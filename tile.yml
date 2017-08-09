@@ -69,7 +69,6 @@ packages:
       # Choose a value between 1 and 8 inclusive. Defaults to 4
       pcf.firehose.parallelism: 4
       pcf.firehose.subscriptionId: firehose-to-wavefront-proxy
-      pcf.firehose.fetchAppInfo: true
       # PCF AppInfo properties
       pcf.appInfo.fetchAppInfo: true
       pcf.appInfo.appInfoCacheSize: 5000
