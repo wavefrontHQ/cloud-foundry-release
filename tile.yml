@@ -1,5 +1,5 @@
 ---
-name: wavefront-tile # By convention lowercase with dashes
+name: wavefront-nozzle # By convention lowercase with dashes
 icon_file: resources/wavefront.png
 label: Wavefront by VMWare Nozzle for PCF
 description: Wavefront proxy and firehose nozzle
@@ -7,7 +7,7 @@ description: Wavefront proxy and firehose nozzle
 
 # Global defaults (all optional)
 #
-org: wavefront-tile-org                         # Name of org to create for your apps
+org: wavefront-nozzle-org                       # Name of org to create for your apps
 space: wavefront-apps-space                     # Name of space to create for your apps
 # apply_open_security_group: true               # Apply open security group, default: false
 
