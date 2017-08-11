@@ -70,7 +70,7 @@ packages:
       pcf.firehose.parallelism: 4
       pcf.firehose.subscriptionId: firehose-to-wavefront-proxy
       # PCF AppInfo properties
-      pcf.appInfo.fetchAppInfo: true
+      pcf.appInfo.fetchAppInfo: false
       pcf.appInfo.appInfoCacheSize: 5000
       pcf.appInfo.cacheExpireIntervalHours: 6
       # Wavefront-Proxy properties
