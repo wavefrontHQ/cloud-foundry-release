@@ -1,0 +1,183 @@
+---
+name: wavefront-nozzle # By convention lowercase with dashes
+icon_file: resources/wavefront.png
+label: Wavefront by VMWare Nozzle for PCF
+description: Wavefront proxy and firehose nozzle
+# metadata_version: 1.8                 # Optional, defaults to 1.5
+
+# Global defaults (all optional)
+#
+org: wavefront-nozzle-org                       # Name of org to create for your apps
+space: wavefront-apps-space                     # Name of space to create for your apps
+# apply_open_security_group: true               # Apply open security group, default: false
+
+# Specify the packages to be included in your tile.
+# The format of the section to include depends on the type
+# of package you are describing. For fragments of each type
+# that you can copy & paste, see:
+#
+# https://github.com/cf-platform-eng/tile-generator/blob/master/README.md
+#
+packages:
+- name: wavefront-proxy
+  type: app
+  label: Wavefront Proxy Application
+  manifest:
+    path: resources/proxy-4.17-uber.jar
+    buildpack: https://github.com/cloudfoundry/java-buildpack.git
+    health-check-type: process
+    memory: 4G
+    instances: 2
+    no-route: true
+    env:
+      JBP_CONFIG_JAVA_MAIN: '{ arguments: "-t $API_TOKEN -h $WAVEFRONT_URL --hostname $FRIENDLY_HOSTNAME --pushListenerPorts 8080" }'
+  post_deploy: |
+    cf set-quota $CF_ORG $CF_QUOTA_NAME
+    cf map-route $APP_NAME $CF_TCP_DOMAIN_NAME --port $WAVEFRONT_PROXY_PORT
+
+- name: wavefront-service-broker
+  type: app-broker
+  label: Wavefront Service Broker
+  enable_global_access_to_plans: true
+  manifest:
+    path: resources/wavefront-cloudfoundry-broker-0.9.0-SNAPSHOT.jar
+    buildpack: https://github.com/cloudfoundry/java-buildpack.git
+    memory: 1G
+    instances: 1
+
+- name: wavefront-firehose-nozzle
+  type: app
+  label: Wavefront Nozzle Application
+  manifest:
+    path: resources/wavefront-nozzle-0.9.0-SNAPSHOT.jar
+    buildpack: https://github.com/cloudfoundry/java-buildpack.git
+    health-check-type: process
+    memory: 2G
+    instances: 1
+    no-route: true
+    env:
+      JAVA_OPTS: '-Dreactor.ipc.netty.pool.maxConnections=32'
+      # PCF properties
+      # Note: Commented out PCF properties are gathered from form input below
+      # pcf.host: $CF_API_HOSTNAME
+      # pcf.user: $UAA_USERNAME
+      # pcf.password: $UAA_PASSWORD
+      # pcf.skipSslValidation: true
+      # Firehose properties
+      # Valid firehose event types - { COUNTER_EVENT, VALUE_METRIC, CONTAINER_METRIC, ERROR, HTTP_START_STOP, LOG_MESSAGE }
+      pcf.firehose.eventTypes: COUNTER_EVENT, VALUE_METRIC, CONTAINER_METRIC
+      # Choose a value between 1 and 8 inclusive. Defaults to 4
+      pcf.firehose.parallelism: 4
+      pcf.firehose.subscriptionId: firehose-to-wavefront-proxy
+      # PCF AppInfo properties
+      pcf.appInfo.fetchAppInfo: false
+      pcf.appInfo.appInfoCacheSize: 5000
+      pcf.appInfo.cacheExpireIntervalHours: 6
+      # Wavefront-Proxy properties
+      # wavefront.proxy.hostname: $CF_TCP_DOMAIN_NAME
+      # wavefront.proxy.port: $CF_TCP_PORT
+
+
+# Include stemcell criteria if you don't want to accept the default.
+# Since this stemcell is only used to run pre and post errands, we
+# strongly recommend you leave this alone so that your tile always
+# runs with the latest stemcell.
+#
+# stemcell_criteria:
+#   os: ubuntu-trusty
+#   requires_cpi: false
+#   version: '3062'
+
+# Add properties you want to pass to your applications.
+# Properties specified here will not be configurable by the user.
+#
+# properties:
+# - name: example_property
+#   type: string
+#   default: specify a value
+#   label: Label for the field on the GUI
+#   description: Longer description of the field's purpose
+
+# Uncomment this section if you want to display forms with configurable
+# properties in Ops Manager. These properties will be passed to your
+# applications as environment variables. You can also refer to them
+# elsewhere in this template by using:
+#     (( .properties.<property-name> ))
+#
+forms:
+- name: wavefront_proxy_properties
+  label: Wavefront Proxy Config
+  description: Wavefront Proxy Configuration
+  properties:
+  - name: wavefront_url
+    type: string
+    label: Wavefront Instance URL
+    description: The Wavefront URL such as https://YOUR_INSTANCE.wavefront.com/api
+    placeholder: https://YOUR_INSTANCE.wavefront.com/api
+    optional: false
+  - name: api_token
+    type: string
+    label: Wavefront API Token
+    description: The Wavefront API token
+    optional: false
+  - name: friendly_hostname
+    type: string
+    label: User friendly hostname
+    description: A user friendly proxy hostname such as DOMAIN-pcf-proxy
+    placeholder: DOMAIN-pcf-proxy
+    optional: false
+  - name: cf_tcp_domain_name
+    type: string
+    label: CF TCP Domain
+    description: The CF TCP domain such as tcp.YOUR-APPS-DOMAIN
+    placeholder: tcp.apps.domain.io
+    optional: false
+  - name: wavefront_proxy_port
+    type: integer
+    label: CF TCP Port
+    description: The CF TCP routing port
+    optional: false
+  - name: cf_quota_name
+    type: string
+    label: CF Quota Name
+    description: The Quota to assign for the tile org. The Quota should have routes and ports available.
+    optional: false
+
+- name: wavefront_nozzle_properties
+  label: Wavefront Firehose Nozzle Config
+  description: Wavefront Nozzle Configuration
+  properties:
+  - name: wavefront_proxy_hostname
+    type: string
+    label: CF TCP Domain
+    description: The CF TCP domain such as tcp.DOMAIN.io
+    placeholder: tcp.DOMAIN.io
+    optional: false
+  - name: pcf_host
+    type: string
+    label: CF API Hostname
+    description: The CF API hostname such as api.YOUR-SYSTEM-DOMAIN
+    optional: false
+  - name: pcf_user
+    type: string
+    label: CF UAA Username
+    description: The CF UAA username with read-only access to the firehose and cloud controller
+    optional: false
+  - name: pcf_password
+    type: secret
+    label: CF UAA Password
+    description: The CF UAA password
+    optional: false
+  - name: pcf_skipSslValidation
+    type: boolean
+    label: Skip SSL Verification
+    default: false
+    description: Useful for testing environments where SSL is not properly setup. Should not be used in prod environments.
+
+# Customize upgrade parameters if the defaults don't meet your needs.
+#
+# update:
+#   canaries: 1
+#   canary_watch_time: 10000-100000
+#   max_in_flight: 1
+#   update_watch_time: 10000-100000
