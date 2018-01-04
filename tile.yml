@@ -3,7 +3,7 @@ name: wavefront-nozzle # By convention lowercase with dashes
 icon_file: resources/wavefront.png
 label: Wavefront by VMWare Nozzle for PCF
 description: Wavefront proxy and firehose nozzle
-# metadata_version: 1.8                 # Optional, defaults to 1.5
+metadata_version: 1.8                 # Optional, defaults to 1.5
 
 # Global defaults (all optional)
 #
@@ -23,14 +23,15 @@ packages:
   type: app
   label: Wavefront Proxy Application
   manifest:
-    path: resources/proxy-4.17-uber.jar
-    buildpack: https://github.com/cloudfoundry/java-buildpack.git
+    path: resources/proxy-4.24-uber.jar
+    buildpack: java_buildpack_offline
     health-check-type: process
     memory: 4G
     instances: 2
     no-route: true
     env:
       JBP_CONFIG_JAVA_MAIN: '{ arguments: "-t $API_TOKEN -h $WAVEFRONT_URL --hostname $FRIENDLY_HOSTNAME --pushListenerPorts 8080" }'
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 1.8.0_+ }}'
   post_deploy: |
     cf set-quota $CF_ORG $CF_QUOTA_NAME
     cf map-route $APP_NAME $CF_TCP_DOMAIN_NAME --port $WAVEFRONT_PROXY_PORT
@@ -40,8 +41,8 @@ packages:
   label: Wavefront Service Broker
   enable_global_access_to_plans: true
   manifest:
-    path: resources/wavefront-cloudfoundry-broker-0.9.0-SNAPSHOT.jar
-    buildpack: https://github.com/cloudfoundry/java-buildpack.git
+    path: resources/wavefront-cloudfoundry-broker-0.9.1-SNAPSHOT.jar
+    buildpack: java_buildpack_offline
     memory: 1G
     instances: 1
 
@@ -49,14 +50,14 @@ packages:
   type: app
   label: Wavefront Nozzle Application
   manifest:
-    path: resources/wavefront-nozzle-0.9.0-SNAPSHOT.jar
-    buildpack: https://github.com/cloudfoundry/java-buildpack.git
+    path: resources/wavefront-nozzle-0.9.1-SNAPSHOT.jar
+    buildpack: java_buildpack_offline
     health-check-type: process
     memory: 2G
     instances: 1
     no-route: true
     env:
-      JAVA_OPTS: '-Dreactor.ipc.netty.pool.maxConnections=32'
+      JAVA_OPTS: '-DcustomTag.foundation=$CUSTOM_TAG_FOUNDATION -Dreactor.ipc.netty.pool.maxConnections=32 -Dlogging.level.cloudfoundry-client.request=DEBUG -Dlogging.level.cloudfoundry-client.response=DEBUG'
       # PCF properties
       # Note: Commented out PCF properties are gathered from form input below
       # pcf.host: $CF_API_HOSTNAME
@@ -70,12 +71,13 @@ packages:
       pcf.firehose.parallelism: 4
       pcf.firehose.subscriptionId: firehose-to-wavefront-proxy
       # PCF AppInfo properties
-      pcf.appInfo.fetchAppInfo: false
+      pcf.appInfo.fetchAppInfo: true
       pcf.appInfo.appInfoCacheSize: 5000
       pcf.appInfo.cacheExpireIntervalHours: 6
       # Wavefront-Proxy properties
       # wavefront.proxy.hostname: $CF_TCP_DOMAIN_NAME
       # wavefront.proxy.port: $CF_TCP_PORT
+      # customTag.foundation
 
 
 # Include stemcell criteria if you don't want to accept the default.
@@ -167,6 +169,11 @@ forms:
     type: secret
     label: CF UAA Password
     description: The CF UAA password
+    optional: false
+  - name: custom_tag_foundation
+    type: string
+    label: PCF foundation name
+    description: A user friendly PCF foundation name. This is included as a point tag on the metrics sent to Wavefront.
     optional: false
   - name: pcf_skipSslValidation
     type: boolean

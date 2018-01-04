@@ -2,3 +2,4 @@ product/*
 release/*
 resources/*
 tile-generator-env/*
+.DS_Store
