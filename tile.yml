@@ -23,7 +23,7 @@ packages:
   type: app
   label: Wavefront Proxy Application
   manifest:
-    path: resources/proxy-4.24-uber.jar
+    path: resources/proxy-4.25-uber.jar
     buildpack: java_buildpack_offline
     health-check-type: process
     memory: 4G
@@ -41,7 +41,7 @@ packages:
   label: Wavefront Service Broker
   enable_global_access_to_plans: true
   manifest:
-    path: resources/wavefront-cloudfoundry-broker-0.9.1-SNAPSHOT.jar
+    path: resources/wavefront-cloudfoundry-broker-0.9.2-SNAPSHOT.jar
     buildpack: java_buildpack_offline
     memory: 1G
     instances: 1
@@ -50,7 +50,7 @@ packages:
   type: app
   label: Wavefront Nozzle Application
   manifest:
-    path: resources/wavefront-nozzle-0.9.1-SNAPSHOT.jar
+    path: resources/wavefront-nozzle-0.9.2-SNAPSHOT.jar
     buildpack: java_buildpack_offline
     health-check-type: process
     memory: 2G
