@@ -1,7 +1,7 @@
 ---
 name: wavefront-nozzle # By convention lowercase with dashes
 icon_file: resources/wavefront.png
-label: Wavefront by VMWare Nozzle for PCF
+label: Wavefront by VMware Nozzle for PCF
 description: Wavefront proxy and firehose nozzle
 metadata_version: 1.8                 # Optional, defaults to 1.5
 
@@ -20,35 +20,52 @@ space: wavefront-apps-space                     # Name of space to create for yo
 #
 packages:
 - name: wavefront-proxy
-  type: app
-  label: Wavefront Proxy Application
-  manifest:
-    path: resources/proxy-4.25-uber.jar
-    buildpack: java_buildpack_offline
-    health-check-type: process
-    memory: 4G
-    instances: 2
-    no-route: true
-    env:
-      JBP_CONFIG_JAVA_MAIN: '{ arguments: "-t $API_TOKEN -h $WAVEFRONT_URL --hostname $FRIENDLY_HOSTNAME --pushListenerPorts 8080" }'
-      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 1.8.0_+ }}'
+  type: bosh-release
+  label: Wavefront Proxy
+  path: resources/proxy-bosh-release.tgz
+  jobs:
+  - name: wavefront_proxy
+    templates:
+    - name: wavefront_proxy
+      release: wavefront-proxy
+    memory: 4096
+    cpu: 2
+    static_ip: 0
+    dynamic_ip: 1
+    default_internet_connected: true
+    properties:
+      wavefront_url: (( .properties.wavefront_url.value ))
+      wavefront_token: (( .properties.wavefront_token.value ))
+      wavefront_push_listener_port: 2878
+      wavefront_opentsdb_port: 4242
+      friendly_hostname: (( .properties.friendly_hostname.value ))
   post_deploy: |
     cf set-quota $CF_ORG $CF_QUOTA_NAME
-    cf map-route $APP_NAME $CF_TCP_DOMAIN_NAME --port $WAVEFRONT_PROXY_PORT
 
 - name: wavefront-service-broker
   type: app-broker
   label: Wavefront Service Broker
   enable_global_access_to_plans: true
+  consumes:
+    proxy_conn:
+      from: proxy_conn
   manifest:
     path: resources/wavefront-cloudfoundry-broker-0.9.2-SNAPSHOT.jar
     buildpack: java_buildpack_offline
     memory: 1G
     instances: 1
+    env:
+      wavefront.proxy.port: 2878
+  post_deploy: |
+    cf set-env $APP_NAME WAVEFRONT_PROXY_HOSTNAME $PROXY_CONN_HOST
+    cf restage $APP_NAME
 
 - name: wavefront-firehose-nozzle
   type: app
-  label: Wavefront Nozzle Application
+  label: Wavefront Firehose Nozzle
+  consumes:
+    proxy_conn:
+      from: proxy_conn
   manifest:
     path: resources/wavefront-nozzle-0.9.2-SNAPSHOT.jar
     buildpack: java_buildpack_offline
@@ -75,37 +92,16 @@ packages:
       pcf.appInfo.appInfoCacheSize: 5000
       pcf.appInfo.cacheExpireIntervalHours: 6
       # Wavefront-Proxy properties
-      # wavefront.proxy.hostname: $CF_TCP_DOMAIN_NAME
-      # wavefront.proxy.port: $CF_TCP_PORT
-      # customTag.foundation
+      # wavefront.proxy.hostname: $PROXY_CONN_HOST
+      wavefront.proxy.port: 2878
+  post_deploy: |
+    cf set-env $APP_NAME WAVEFRONT_PROXY_HOSTNAME $PROXY_CONN_HOST
+    cf restage $APP_NAME
 
+#stemcell_criteria:
+#  os: 'ubuntu-trusty'
+#  version: latest
 
-# Include stemcell criteria if you don't want to accept the default.
-# Since this stemcell is only used to run pre and post errands, we
-# strongly recommend you leave this alone so that your tile always
-# runs with the latest stemcell.
-#
-# stemcell_criteria:
-#   os: ubuntu-trusty
-#   requires_cpi: false
-#   version: '3062'
-
-# Add properties you want to pass to your applications.
-# Properties specified here will not be configurable by the user.
-#
-# properties:
-# - name: example_property
-#   type: string
-#   default: specify a value
-#   label: Label for the field on the GUI
-#   description: Longer description of the field's purpose
-
-# Uncomment this section if you want to display forms with configurable
-# properties in Ops Manager. These properties will be passed to your
-# applications as environment variables. You can also refer to them
-# elsewhere in this template by using:
-#     (( .properties.<property-name> ))
-#
 forms:
 - name: wavefront_proxy_properties
   label: Wavefront Proxy Config
@@ -117,7 +113,7 @@ forms:
     description: The Wavefront URL such as https://YOUR_INSTANCE.wavefront.com/api
     placeholder: https://YOUR_INSTANCE.wavefront.com/api
     optional: false
-  - name: api_token
+  - name: wavefront_token
     type: string
     label: Wavefront API Token
     description: The Wavefront API token
@@ -126,35 +122,18 @@ forms:
     type: string
     label: User friendly hostname
     description: A user friendly proxy hostname such as DOMAIN-pcf-proxy
-    placeholder: DOMAIN-pcf-proxy
-    optional: false
-  - name: cf_tcp_domain_name
-    type: string
-    label: CF TCP Domain
-    description: The CF TCP domain such as tcp.YOUR-APPS-DOMAIN
-    placeholder: tcp.apps.domain.io
-    optional: false
-  - name: wavefront_proxy_port
-    type: integer
-    label: CF TCP Port
-    description: The CF TCP routing port
+    placeholder: pcf-proxy
     optional: false
   - name: cf_quota_name
     type: string
     label: CF Quota Name
-    description: The Quota to assign for the tile org. The Quota should have routes and ports available.
+    description: The Quota to assign for the tile org
     optional: false
 
 - name: wavefront_nozzle_properties
   label: Wavefront Firehose Nozzle Config
   description: Wavefront Nozzle Configuration
   properties:
-  - name: wavefront_proxy_hostname
-    type: string
-    label: CF TCP Domain
-    description: The CF TCP domain such as tcp.DOMAIN.io
-    placeholder: tcp.DOMAIN.io
-    optional: false
   - name: pcf_host
     type: string
     label: CF API Hostname
@@ -180,11 +159,3 @@ forms:
     label: Skip SSL Verification
     default: false
     description: Useful for testing environments where SSL is not properly setup. Should not be used in prod environments.
-
-# Customize upgrade parameters if the defaults don't meet your needs.
-#
-# update:
-#   canaries: 1
-#   canary_watch_time: 10000-100000
-#   max_in_flight: 1
-#   update_watch_time: 10000-100000
