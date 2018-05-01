@@ -1,0 +1,5 @@
+---
+name: wavefront_proxy_pkg
+dependencies: []
+files:
+- proxy-4.26-uber.jar

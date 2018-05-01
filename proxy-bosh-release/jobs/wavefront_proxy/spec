@@ -1,0 +1,29 @@
+---
+name: wavefront_proxy
+templates:
+  wavefront.conf.erb: conf/wavefront.conf
+  log4j2.xml.erb: conf/log4j2.xml
+  proxy_ctl.erb: bin/proxy_ctl
+  
+packages:
+- openjdk
+- commons-daemon
+- wavefront_proxy_pkg
+
+provides:
+- name: proxy_conn
+  type: proxy_conn
+
+properties: 
+  wavefront_url:
+    description: Wavefront URL
+  wavefront_token:
+    description: Token
+  wavefront_push_listener_port:
+    description: Push Listener Port
+    default: 2878
+  wavefront_opentsdb_port:
+    description: OpenTSDB port
+    default: 4242
+  friendly_hostname:
+    description: HostName to Use

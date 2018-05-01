@@ -1,0 +1,60 @@
+name: wavefront-proxy
+director_uuid: <%= `bosh status --uuid` %>
+
+releases:
+- name: wavefront-proxy
+  version: latest
+
+compilation:
+  workers: 1
+  network: proxy-network
+  reuse_compilation_vms: true
+  cloud_properties:
+    name: random
+
+update:
+  canaries: 1
+  canary_watch_time: 30000-240000
+  update_watch_time: 30000-600000
+  max_in_flight: 3
+
+resource_pools:
+- name: common-resource-pool
+  network: proxy-network
+  size: 1
+  stemcell:
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+    version: latest
+  cloud_properties:
+    name: random
+
+networks:
+- name: proxy-network
+  type: manual
+  subnets:
+  - range: 10.244.1.0/24
+    gateway: 10.244.1.1
+    static:
+      - 10.244.1.2
+    cloud_properties:
+      name: random
+
+jobs:
+- name: wavefront_proxy
+  template: wavefront_proxy
+  instances: 1
+  resource_pool: common-resource-pool
+  networks:
+    - name: proxy-network
+      static_ips:
+        - 10.244.1.2
+
+properties:
+  wavefront_proxy:
+    wavefront_url: FIX_ME
+    api_token: FIX_ME
+    friendly_hostname: FIX_ME
+    memory:
+      max_heap: 1024
+      min_heap: 1024
+

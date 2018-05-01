@@ -1,0 +1,6 @@
+# TODO: flesh this out
+check process wavefront_proxy
+  with pidfile /var/vcap/sys/run/wavefront_proxy/wavefront-proxy.pid
+  start program "/var/vcap/jobs/wavefront_proxy/bin/proxy_ctl start" with timeout 30 seconds
+  stop program "/var/vcap/jobs/wavefront_proxy/bin/proxy_ctl stop" with timeout 30 seconds
+  group vcap

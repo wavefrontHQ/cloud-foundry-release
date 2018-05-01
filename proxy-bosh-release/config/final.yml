@@ -1,0 +1,7 @@
+---
+blobstore:
+  provider: local
+  options:
+    blobstore_path: /tmp/wavefront-proxy-release-blobs
+final_name: wavefront-proxy
+

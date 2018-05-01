@@ -1,0 +1,4 @@
+#TODO: flesh this out
+set -e
+
+cp -r * ${BOSH_INSTALL_TARGET}

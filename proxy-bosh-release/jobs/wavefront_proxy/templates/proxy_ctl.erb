@@ -1,0 +1,62 @@
+#!/bin/bash -e
+set -x
+
+PROXY_DIR=/var/vcap/packages/wavefront_proxy_pkg
+OPENJDK_HOME=/var/vcap/packages/openjdk/
+COMMONS_DAEMON=/var/vcap/packages/commons-daemon
+LOG_DIR=/var/vcap/sys/log/wavefront_proxy
+RUN_DIR=/var/vcap/sys/run/wavefront_proxy
+DEBUG_LOG=$LOG_DIR/wavefront-proxy-start.log
+PIDFILE=$RUN_DIR/wavefront-proxy.pid
+SPOOL_DIR=/var/vcap/data/spool/wavefront-proxy/
+ID_DIR=/var/vcap/data/wavefront-proxy
+
+mkdir -p $LOG_DIR $RUN_DIR $SPOOL_DIR $ID_DIR
+chown -R vcap:vcap "$LOG_DIR" "$RUN_DIR" "$SPOOL_DIR" "$ID_DIR"
+
+function log_debug() {
+  echo `date` $1 >> $DEBUG_LOG
+}
+
+case "$1" in
+start)
+      cd $COMMONS_DAEMON
+      archive=`ls commons-daemon.tar`
+      tar -xvf $archive
+
+      cd $OPENJDK_HOME
+      archive=`ls openjdk*gz`
+      tar -zxvf $archive
+
+      if [[ -d bin && `bin/java -Xmx64M -version 2>&1` =~ "OpenJDK 64-Bit Server" && $? == 0 ]]; then
+         export JRE_HOME=${OPENJDK_HOME}
+         export JAVA_BINARY=${JRE_HOME}/bin/java
+         cd ..
+      else
+         log_debug "JVM is not properly packaged"
+         exit 1
+      fi
+      log_debug "Located Java Binary at: ${JAVA_BINARY}"
+      su vcap -c "$COMMONS_DAEMON/commons-daemon/src/native/unix/jsvc -user vcap -home $JRE_HOME -cp $PROXY_DIR/proxy-4.26-uber.jar \
+            -XX:+AggressiveHeap -Xss2049k -XX:OnOutOfMemoryError=\"kill -1 %p\" \
+            -Dlog4j.configurationFile=/var/vcap/jobs/wavefront_proxy/conf/log4j2.xml \
+            -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
+            -errfile $LOG_DIR/wavefront-error.log \
+            -pidfile $PIDFILE -wait 20 -debug com.wavefront.agent.PushAgentDaemon \
+            -f /var/vcap/jobs/wavefront_proxy/conf/wavefront.conf 2>> $LOG_DIR/wavefront.err.log"
+      log_debug "Started Successfully"
+;;
+stop)
+      su vcap -c "$COMMONS_DAEMON/commons-daemon/src/native/unix/jsvc -user vcap -home $OPENJDK_HOME -cp $PROXY_DIR/proxy-4.26-uber.jar \
+            -XX:+AggressiveHeap -Xss2049k -XX:OnOutOfMemoryError=\"kill -1 %p\" \
+            -Dlog4j.configurationFile=/var/vcap/jobs/wavefront_proxy/conf/log4j2.xml \
+            -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
+            -errfile $LOG_DIR/wavefront-error.log \
+            -pidfile $PIDFILE -wait 20 -debug -stop com.wavefront.agent.PushAgentDaemon \
+            -f /var/vcap/jobs/wavefront_proxy/conf/wavefront.conf 2>> $LOG_DIR/wavefront.err.log"
+      rm -f $PIDFILE
+;;
+*)
+        echo "Usage: $0 {start | stop}"
+        exit 1
+esac
