@@ -1,0 +1,3 @@
+./proxy-bosh-release.tgz
+./wavefront-cloudfoundry-broker-{VERSION}.jar
+./wavefront-nozzle-{VERSION}.jar
