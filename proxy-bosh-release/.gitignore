@@ -1,4 +1,4 @@
-blobs/*.tar
-blobs/*.tgz
-blobs/*.gz
+blobs/*
 dev_releases/*
+src/*
+.dev_builds/*
