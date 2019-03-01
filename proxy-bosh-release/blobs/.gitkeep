@@ -1,2 +1,0 @@
-bosh add-blob /tmp/blobs/commons-daemon.tar commons-daemon.tar
-bosh add-blob /tmp/blobs/openjdk-1.8.0_121.tar.gz openjdk-1.8.0_121.tar.gz

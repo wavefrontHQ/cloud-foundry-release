@@ -23,7 +23,7 @@ resource_pools:
   network: proxy-network
   size: 1
   stemcell:
-    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+    name: bosh-warden-boshlite-ubuntu-xenial-go_agent
     version: latest
   cloud_properties:
     name: random
