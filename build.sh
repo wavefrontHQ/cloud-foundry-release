@@ -131,7 +131,7 @@ echo "###"
 echo
 (
     cd proxy-bosh-release
-    bosh create-release $BOSH_OPTS --name wavefront-proxy --tarball ../resources/wf-proxy-bosh-release.tgz
+    bosh create-release $BOSH_OPTS --name wavefront-proxy --tarball ../resources/proxy-bosh-release.tgz
 )
 
 echo

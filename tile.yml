@@ -1,18 +1,18 @@
 ---
-name: wavefront-nozzle-glp
+name: wavefront-nozzle
 icon_file: resources/wavefront.png
-label: Wavefront by VMware Nozzle for PCF GO
+label: Wavefront by VMware Nozzle for PCF
 description: Wavefront proxy and firehose nozzle
 metadata_version: 1.8
 
-org: wf-org-go 
-space: wf-apps-go
+org: wavefront-nozzle-org
+space: wavefront-apps-space
 
 packages:
-- name: wavefront_proxy
+- name: wavefront-proxy
   type: bosh-release
   label: Wavefront Proxy
-  path: resources/wf-proxy-bosh-release.tgz
+  path: resources/proxy-bosh-release.tgz
   jobs:
   - name: wavefront_proxy
     templates:
@@ -32,7 +32,7 @@ packages:
   post_deploy: |
     cf set-quota $CF_ORG $CF_QUOTA_NAME
 
-- name: wavefront_service_broker
+- name: wavefront-service-broker
   type: app-broker
   label: Wavefront Service Broker
   enable_global_access_to_plans: true
@@ -50,7 +50,7 @@ packages:
     cf set-env $APP_NAME WAVEFRONT_PROXY_HOSTNAME $PROXY_CONN_HOST
     cf restage $APP_NAME
 
-- name: wavefront_firehose_nozzle
+- name: wavefront-firehose-nozzle
   type: app
   label: Wavefront Firehose Nozzle
   manifest:
@@ -72,7 +72,6 @@ packages:
       NOZZLE_SELECTED_EVENTS: ValueMetric,CounterEvent,ContainerMetric
 
       WAVEFRONT_PROXY_PORT: 2878
-      WAVEFRONT_FLUSH_INTERVAL: 15
       WAVEFRONT_PREFIX: pcf
       WAVEFRONT_FOUNDATION: (( .properties.custom_tag_foundation.value ))
   post_deploy: |
@@ -84,7 +83,7 @@ stemcell_criteria:
  version: latest
 
 forms:
-- name: wavefront-proxy-properties
+- name: wavefront_proxy_properties
   label: Wavefront Proxy Config
   description: Wavefront Proxy Configuration
   properties:
