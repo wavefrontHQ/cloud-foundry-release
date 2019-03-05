@@ -78,9 +78,9 @@ packages:
     cf set-env $APP_NAME WAVEFRONT_PROXY_ADDR $PROXY_CONN_HOST
     cf restage $APP_NAME
 
-# stemcell_criteria:
-#  os: 'ubuntu-trusty'
-#  version: latest
+stemcell_criteria:
+ os: 'ubuntu-xenial'
+ version: '170'
 
 forms:
 - name: wavefront_proxy_properties
