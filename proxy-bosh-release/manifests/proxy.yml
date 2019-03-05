@@ -54,6 +54,7 @@ properties:
     wavefront_url: FIX_ME
     api_token: FIX_ME
     friendly_hostname: FIX_ME
+    wavefront_preprocessor_rules: FIX_ME
     memory:
       max_heap: 1024
       min_heap: 1024
