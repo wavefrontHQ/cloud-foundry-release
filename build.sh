@@ -10,7 +10,7 @@ set -e
 PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-4.35.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
-NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1-beta.1.tar.gz'
+NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1-beta.3.tar.gz'
 NOZZLE_TGZ='nozzle.tgz'
 
 BROKER_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-servicebroker/archive/0.9.3.tar.gz'
@@ -38,11 +38,15 @@ esac
 done
 
 [ "${FINAL}" == "NO" ] && BOSH_OPTS="--force"
-[ "${DEBUG}" == "YES" ] && BOSH_LOG_LEVEL=debug
+[ "${DEBUG}" == "YES" ] && export BOSH_LOG_LEVEL=debug
 [ "${DEBUG}" == "YES" ] && MVN_OPTS='-B' || MVN_OPTS='-q'
 
-mkdir -p tmp
-mkdir -p wf_file
+[ -d "tmp" ] && rm -rf tmp/* || mkdir -p tmp
+
+[ -f proxy-bosh-release/src/wavefront-proxy.jar ] && rm proxy-bosh-release/src/wavefront-proxy.jar
+[ -f resources/proxy-bosh-release.tgz ] && rm resources/proxy-bosh-release.tgz
+[ -f resources/wavefront-broker.jar ] && rm resources/wavefront-broker.jar
+[ -d resources/cloud-foundry-nozzle-go ] && rm -rf resources/cloud-foundry-nozzle-go
 
 echo
 echo "###"
@@ -69,15 +73,11 @@ echo "###"
 echo
 
 (
-    cd wf_files
-    [ "${DOWNLOAD}" == "YES" ] && rm ${PROXY_TGZ}
-    if [ ! -f "${PROXY_TGZ}" ]; then
-        echo "Downloading File '${PROXY_TGZ}' => ${PROXY_SOURCE}"
-        curl -L "${PROXY_SOURCE}" --output "${PROXY_TGZ}"
-    fi
+    cd tmp
+    echo "Downloading File '${PROXY_TGZ}' => ${PROXY_SOURCE}"
+    curl -L "${PROXY_SOURCE}" --output "${PROXY_TGZ}"
 
-    cd ../tmp
-    tar -zxf "../wf_files/${PROXY_TGZ}"
+    tar -zxf "${PROXY_TGZ}"
 
     cd java*
     mvn ${MVN_OPTS} clean install -DskipTests
@@ -90,15 +90,12 @@ echo -e "\033[1;32m Building Wavefront nozzle \033[0m"
 echo "###"
 echo
 (
-    cd wf_files
-    [ "${DOWNLOAD}" == "YES" ] && rm ${NOZZLE_TGZ}
-    if [ ! -f "${NOZZLE_TGZ}" ]; then
-        echo "Downloading File '${NOZZLE_TGZ}' => ${NOZZLE_SOURCE}"
-        curl -L "${NOZZLE_SOURCE}" --output "${NOZZLE_TGZ}"
-    fi
+    cd tmp
+    echo "Downloading File '${NOZZLE_TGZ}' => ${NOZZLE_SOURCE}"
+    curl -L "${NOZZLE_SOURCE}" --output "${NOZZLE_TGZ}"
 
-    cd ../resources
-    tar -zxf "../wf_files/${NOZZLE_TGZ}"
+    tar -zxf "${NOZZLE_TGZ}"
+    mv cloud-foundry-nozzle-go* ../resources/cloud-foundry-nozzle-go
 )
 
 echo
@@ -108,15 +105,11 @@ echo "###"
 echo
 
 (
-    cd wf_files
-    [ "${DOWNLOAD}" == "YES" ] && rm ${BROKER_TGZ}
-    if [ ! -f "${BROKER_TGZ}" ]; then
-        echo "Downloading File '${BROKER_TGZ}' => ${BROKER_SOURCE}"
-        curl -L "${BROKER_SOURCE}" --output "${BROKER_TGZ}"
-    fi
+    cd tmp
+    echo "Downloading File '${BROKER_TGZ}' => ${BROKER_SOURCE}"
+    curl -L "${BROKER_SOURCE}" --output "${BROKER_TGZ}"
 
-    cd ../tmp
-    tar -zxf "../wf_files/${BROKER_TGZ}"
+    tar -zxf "${BROKER_TGZ}"
 
     cd cloud-foundry-servicebroker-*
     mvn ${MVN_OPTS} clean install -DskipTests

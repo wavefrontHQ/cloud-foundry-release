@@ -54,7 +54,7 @@ packages:
   type: app
   label: Wavefront Firehose Nozzle
   manifest:
-    path: resources/cloud-foundry-nozzle-go-1-beta.1
+    path: resources/cloud-foundry-nozzle-go
     buildpack: go_buildpack
     health-check-type: process
     memory: 2G
@@ -78,9 +78,9 @@ packages:
     cf set-env $APP_NAME WAVEFRONT_PROXY_ADDR $PROXY_CONN_HOST
     cf restage $APP_NAME
 
-stemcell_criteria:
- os: 'ubuntu-trusty'
- version: latest
+# stemcell_criteria:
+#  os: 'ubuntu-trusty'
+#  version: latest
 
 forms:
 - name: wavefront_proxy_properties
