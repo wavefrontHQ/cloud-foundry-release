@@ -132,4 +132,6 @@ buffer=/var/vcap/data/spool/wavefront-proxy/buffer
 #proxyUser=proxy_user
 #proxyPassword=proxy_password
 
+<% if p("wavefront_preprocessor_rules").length > 0 %>
 preprocessorConfigFile=/var/vcap/jobs/wavefront_proxy/conf/preprocessor_rules.yaml
+<% end %>

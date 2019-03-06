@@ -29,4 +29,5 @@ properties:
   friendly_hostname:
     description: HostName to Use
   wavefront_preprocessor_rules:
+    default: ''
     description: Filters
