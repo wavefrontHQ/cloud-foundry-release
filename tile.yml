@@ -145,3 +145,23 @@ forms:
     label: Skip SSL Verification
     default: false
     description: Useful for testing environments where SSL is not properly setup. Should not be used in prod environments.
+  - name: filter_metrics_white_list
+    type: string_list
+    label: Metrics White List
+    optional: true
+    description: Coma separated Standard Wildcards (globbing patterns).
+  - name: filter_metrics_black_list
+    type: string_list
+    label: Metrics Black List
+    optional: true
+    description: Coma separated Standard Wildcards (globbing patterns).
+  - name: filter_tags_white_list
+    type: string_list
+    label: Tags White List
+    optional: true
+    description: Format 'name_wildcard=[value_wildcard, wildcards, ..., wildcards]'.
+  - name: filter_tags_black_list
+    type: string_list
+    label: Tags Black List
+    optional: true
+    description: Format 'name_wildcard=[value_wildcard, wildcards, ..., wildcards]'.
