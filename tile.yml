@@ -149,12 +149,12 @@ forms:
     type: string_list
     label: Metrics White List
     optional: true
-    description: Coma separated Standard Wildcards (globbing patterns).
+    description: Comma separated list of glob patterns. Only metrics with names matching the whitelist are reported.
   - name: filter_metrics_black_list
     type: string_list
     label: Metrics Black List
     optional: true
-    description: Coma separated Standard Wildcards (globbing patterns).
+    description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.
   - name: filter_tags_white_list
     type: string_list
     label: Tags White List

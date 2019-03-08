@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 read -r -d '' BLOBS_FILES <<- EOM
 https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon.tar
@@ -7,7 +7,7 @@ EOM
 
 set -e
 
-PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-4.35.tar.gz'
+PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-4.36.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
 NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1-beta.5.tar.gz'
