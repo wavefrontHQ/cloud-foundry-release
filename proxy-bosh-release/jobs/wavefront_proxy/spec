@@ -31,3 +31,6 @@ properties:
   wavefront_preprocessor_rules:
     default: ''
     description: Filters
+  custom_config_selector:
+    default: ''
+

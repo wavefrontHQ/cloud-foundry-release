@@ -115,6 +115,25 @@ forms:
     label: Preprocessor Rules
     description: User-defined point filtering and altering rules before data is sent to Wavefront
     optional: true
+  - name: custom_config_selector
+    type: selector
+    label: Custom Proxy configuration
+    default: "Default"
+    configurable: true
+    option_templates:
+      - name: default
+        select_value: "Default"
+        configurable: true
+        property_blueprints: []
+      - name: custom
+        select_value: "Custom"
+        property_blueprints:
+        - name: custom_config
+          type: text
+          label: Config
+          optional: true
+          configurable: true
+          description: Directive 'server', 'hostname', 'token', 'pushListenerPorts', 'opentsdbPorts', 'idFile', 'buffer' and 'preprocessorConfigFile' will be ignored
 
 - name: wavefront_nozzle_properties
   label: Wavefront Firehose Nozzle Config
@@ -155,13 +174,3 @@ forms:
     label: Metrics Black List
     optional: true
     description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.
-  - name: filter_tags_white_list
-    type: string_list
-    label: Tags White List
-    optional: true
-    description: Format 'name_wildcard=[value_wildcard, wildcards, ..., wildcards]'.
-  - name: filter_tags_black_list
-    type: string_list
-    label: Tags Black List
-    optional: true
-    description: Format 'name_wildcard=[value_wildcard, wildcards, ..., wildcards]'.
