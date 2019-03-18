@@ -28,9 +28,6 @@ properties:
     default: 4242
   friendly_hostname:
     description: HostName to Use
-  wavefront_preprocessor_rules:
-    default: ''
-    description: Filters
   custom_config_selector:
     default: ''
 

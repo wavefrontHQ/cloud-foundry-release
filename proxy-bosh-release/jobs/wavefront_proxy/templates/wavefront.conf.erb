@@ -6,18 +6,15 @@ opentsdbPorts=<%= p("wavefront_opentsdb_port") %>
 idFile=/var/vcap/data/wavefront-proxy/.wavefront_id
 buffer=/var/vcap/data/spool/wavefront-proxy/buffer
 
-<% if p("wavefront_preprocessor_rules").length > 0 %>
-preprocessorConfigFile=/var/vcap/jobs/wavefront_proxy/conf/preprocessor_rules.yaml
-<% end %>
-
-<% selector = p("custom_config_selector")%>
-<% if selector['value'] == "Custom"
-    keywords = ['server', 'hostname', 'token', 'pushListenerPorts', 'opentsdbPorts', 'idFile', 'buffer', 'preprocessorConfigFile'].join('=|')
+<%
+selector = p("custom_config_selector")
+if (selector.has_key? 'selected_option') && selector['selected_option']
     cfg = selector['selected_option']['custom_config']
-    cfg = cfg.gsub(/(#{keywords})/,'#\1')
-    %>
-    <%= cfg %>
-<% else %>
+    rules = selector['selected_option']['wavefront_preprocessor_rules']
+end 
+%>
+
+<% if selector['value'] == "Default" %>
 ephemeral=false
 pushFlushMaxPoints=40000
 pushFlushInterval=1000
@@ -25,4 +22,17 @@ pushBlockedSamples=5
 pushLogLevel=SUMMARY
 pushValidationLevel=NUMERIC_ONLY
 customSourceTags=fqdn, hostname
+<% else %>
+
+<% if rules && (rules.length > 0) %>
+preprocessorConfigFile=/var/vcap/jobs/wavefront_proxy/conf/preprocessor_rules.yaml
 <% end %>
+
+<% 
+if cfg && (cfg.length > 0)
+    keywords = ['server', 'hostname', 'token', 'pushListenerPorts', 'opentsdbPorts', 'idFile', 'buffer', 'preprocessorConfigFile'].join('=|')
+    cfg = cfg.gsub(/(#{keywords})/,'#\1') %>
+<%= cfg %>
+<% end %>
+
+<% end %> 
