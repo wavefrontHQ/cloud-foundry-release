@@ -2,6 +2,7 @@
 name: wavefront_proxy
 templates:
   wavefront.conf.erb: conf/wavefront.conf
+  preprocessor_rules.yaml.erb: conf/preprocessor_rules.yaml
   log4j2.xml.erb: conf/log4j2.xml
   proxy_ctl.erb: bin/proxy_ctl
   
@@ -27,3 +28,6 @@ properties:
     default: 4242
   friendly_hostname:
     description: HostName to Use
+  custom_config_selector:
+    default: ''
+

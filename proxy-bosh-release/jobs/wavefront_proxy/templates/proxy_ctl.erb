@@ -37,7 +37,7 @@ start)
          exit 1
       fi
       log_debug "Located Java Binary at: ${JAVA_BINARY}"
-      su vcap -c "$COMMONS_DAEMON/commons-daemon/src/native/unix/jsvc -user vcap -home $JRE_HOME -cp $PROXY_DIR/proxy-4.26-uber.jar \
+      su vcap -c "$COMMONS_DAEMON/commons-daemon/src/native/unix/jsvc -user vcap -home $JRE_HOME -cp $PROXY_DIR/wavefront-proxy.jar \
             -XX:+AggressiveHeap -Xss2049k -XX:OnOutOfMemoryError=\"kill -1 %p\" \
             -Dlog4j.configurationFile=/var/vcap/jobs/wavefront_proxy/conf/log4j2.xml \
             -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
@@ -47,7 +47,7 @@ start)
       log_debug "Started Successfully"
 ;;
 stop)
-      su vcap -c "$COMMONS_DAEMON/commons-daemon/src/native/unix/jsvc -user vcap -home $OPENJDK_HOME -cp $PROXY_DIR/proxy-4.26-uber.jar \
+      su vcap -c "$COMMONS_DAEMON/commons-daemon/src/native/unix/jsvc -user vcap -home $OPENJDK_HOME -cp $PROXY_DIR/wavefront-proxy.jar \
             -XX:+AggressiveHeap -Xss2049k -XX:OnOutOfMemoryError=\"kill -1 %p\" \
             -Dlog4j.configurationFile=/var/vcap/jobs/wavefront_proxy/conf/log4j2.xml \
             -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \

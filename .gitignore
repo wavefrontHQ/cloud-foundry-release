@@ -3,3 +3,5 @@ release/*
 resources/*
 tile-generator-env/*
 .DS_Store
+tmp
+wf_files

@@ -1,23 +1,13 @@
 ---
-name: wavefront-nozzle # By convention lowercase with dashes
+name: wavefront-nozzle
 icon_file: resources/wavefront.png
 label: Wavefront by VMware Nozzle for PCF
 description: Wavefront proxy and firehose nozzle
-metadata_version: 1.8                 # Optional, defaults to 1.5
+metadata_version: 1.8
 
-# Global defaults (all optional)
-#
-org: wavefront-nozzle-org                       # Name of org to create for your apps
-space: wavefront-apps-space                     # Name of space to create for your apps
-# apply_open_security_group: true               # Apply open security group, default: false
+org: wavefront-nozzle-org
+space: wavefront-apps-space
 
-# Specify the packages to be included in your tile.
-# The format of the section to include depends on the type
-# of package you are describing. For fragments of each type
-# that you can copy & paste, see:
-#
-# https://github.com/cf-platform-eng/tile-generator/blob/master/README.md
-#
 packages:
 - name: wavefront-proxy
   type: bosh-release
@@ -50,7 +40,7 @@ packages:
     proxy_conn:
       from: proxy_conn
   manifest:
-    path: resources/wavefront-cloudfoundry-broker-0.9.2-SNAPSHOT.jar
+    path: resources/wavefront-broker.jar
     buildpack: java_buildpack_offline
     memory: 1G
     instances: 1
@@ -63,44 +53,34 @@ packages:
 - name: wavefront-firehose-nozzle
   type: app
   label: Wavefront Firehose Nozzle
-  consumes:
-    proxy_conn:
-      from: proxy_conn
   manifest:
-    path: resources/wavefront-nozzle-0.9.2-SNAPSHOT.jar
-    buildpack: java_buildpack_offline
+    path: resources/cloud-foundry-nozzle-go
+    buildpack: go_buildpack
     health-check-type: process
     memory: 2G
     instances: 1
     no-route: true
     env:
-      JAVA_OPTS: '-DcustomTag.foundation=$CUSTOM_TAG_FOUNDATION -Dreactor.ipc.netty.pool.maxConnections=32 -Dlogging.level.cloudfoundry-client.request=DEBUG -Dlogging.level.cloudfoundry-client.response=DEBUG'
-      # PCF properties
-      # Note: Commented out PCF properties are gathered from form input below
-      # pcf.host: $CF_API_HOSTNAME
-      # pcf.user: $UAA_USERNAME
-      # pcf.password: $UAA_PASSWORD
-      # pcf.skipSslValidation: true
-      # Firehose properties
-      # Valid firehose event types - { COUNTER_EVENT, VALUE_METRIC, CONTAINER_METRIC, ERROR, HTTP_START_STOP, LOG_MESSAGE }
-      pcf.firehose.eventTypes: COUNTER_EVENT, VALUE_METRIC, CONTAINER_METRIC
-      # Choose a value between 1 and 8 inclusive. Defaults to 4
-      pcf.firehose.parallelism: 4
-      pcf.firehose.subscriptionId: firehose-to-wavefront-proxy
-      # PCF AppInfo properties
-      pcf.appInfo.fetchAppInfo: true
-      pcf.appInfo.appInfoCacheSize: 5000
-      pcf.appInfo.cacheExpireIntervalHours: 6
-      # Wavefront-Proxy properties
-      # wavefront.proxy.hostname: $PROXY_CONN_HOST
-      wavefront.proxy.port: 2878
+      GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
+
+      NOZZLE_API_URL: (( .properties.pcf_host.value ))
+      NOZZLE_USERNAME: (( .properties.pcf_user.value ))
+      NOZZLE_PASSWORD: (( .properties.pcf_password.value ))
+
+      NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
+      NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
+      NOZZLE_SELECTED_EVENTS: ValueMetric,CounterEvent,ContainerMetric
+
+      WAVEFRONT_PROXY_PORT: 2878
+      WAVEFRONT_PREFIX: pcf
+      WAVEFRONT_FOUNDATION: (( .properties.custom_tag_foundation.value ))
   post_deploy: |
-    cf set-env $APP_NAME WAVEFRONT_PROXY_HOSTNAME $PROXY_CONN_HOST
+    cf set-env $APP_NAME WAVEFRONT_PROXY_ADDR $PROXY_CONN_HOST
     cf restage $APP_NAME
 
-#stemcell_criteria:
-#  os: 'ubuntu-trusty'
-#  version: latest
+stemcell_criteria:
+ os: 'ubuntu-xenial'
+ version: '170'
 
 forms:
 - name: wavefront_proxy_properties
@@ -129,6 +109,30 @@ forms:
     label: CF Quota Name
     description: The Quota to assign for the tile org
     optional: false
+  - name: custom_config_selector
+    type: selector
+    label: Custom Proxy configuration
+    default: "Default"
+    configurable: true
+    option_templates:
+      - name: default
+        select_value: "Default"
+        configurable: true
+        property_blueprints: []
+      - name: custom
+        select_value: "Custom"
+        property_blueprints:
+        - name: custom_config
+          type: text
+          label: Config
+          optional: true
+          configurable: true
+          description: Directive 'server', 'hostname', 'token', 'pushListenerPorts', 'opentsdbPorts', 'idFile', 'buffer' and 'preprocessorConfigFile' will be ignored
+        - name: wavefront_preprocessor_rules
+          type: text
+          label: Preprocessor Rules
+          description: User-defined point filtering and altering rules before data is sent to Wavefront
+          optional: true
 
 - name: wavefront_nozzle_properties
   label: Wavefront Firehose Nozzle Config
@@ -154,8 +158,18 @@ forms:
     label: PCF foundation name
     description: A user friendly PCF foundation name. This is included as a point tag on the metrics sent to Wavefront.
     optional: false
-  - name: pcf_skipSslValidation
+  - name: pcf_skip_ssl_validation
     type: boolean
     label: Skip SSL Verification
     default: false
     description: Useful for testing environments where SSL is not properly setup. Should not be used in prod environments.
+  - name: filter_metrics_white_list
+    type: string_list
+    label: Metrics White List
+    optional: true
+    description: Comma separated list of glob patterns. Only metrics with names matching the whitelist are reported.
+  - name: filter_metrics_black_list
+    type: string_list
+    label: Metrics Black List
+    optional: true
+    description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.
