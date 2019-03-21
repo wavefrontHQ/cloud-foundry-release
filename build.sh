@@ -7,6 +7,9 @@ EOM
 
 set -e
 
+TELEGRAF_SOURCE='https://dl.influxdata.com/telegraf/releases/telegraf-1.10.0-static_linux_amd64.tar.gz'
+TELEGRAF_TGZ='telegraf.tgz'
+
 PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-4.36.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
@@ -48,6 +51,8 @@ done
 [ -f resources/wavefront-broker.jar ] && rm resources/wavefront-broker.jar
 [ -d resources/cloud-foundry-nozzle-go ] && rm -rf resources/cloud-foundry-nozzle-go
 
+# rm telegraf-bosh-release/dev_releases/wavefront-telegraf/*
+
 echo
 echo "###"
 echo -e "\033[1;32m Donwloading dependecies \033[0m"
@@ -68,6 +73,23 @@ echo
 
 echo
 echo "###"
+echo -e "\033[1;32m Building Wavefront Telegraf \033[0m"
+echo "###"
+echo
+
+(
+    cd tmp
+    echo "Downloading File '${TELEGRAF_TGZ}' => ${TELEGRAF_SOURCE}"
+    curl -L "${TELEGRAF_SOURCE}" --output "${TELEGRAF_TGZ}"
+
+    cp ${TELEGRAF_TGZ} ../telegraf-bosh-release/src/
+
+    cd ../telegraf-bosh-release
+    bosh create-release $BOSH_OPTS --name wavefront-telegraf --tarball ../resources/telegraf-bosh-release.tgz
+)
+
+echo
+echo "###"
 echo -e "\033[1;32m Building Wavefront Proxy \033[0m"
 echo "###"
 echo
@@ -84,39 +106,38 @@ echo
     cp proxy/target/proxy-*-uber.jar ../../proxy-bosh-release/src/wavefront-proxy.jar
 )
 
-echo
-echo "###"
-echo -e "\033[1;32m Building Wavefront nozzle \033[0m"
-echo "###"
-echo
-(
-    cd tmp
-    echo "Downloading File '${NOZZLE_TGZ}' => ${NOZZLE_SOURCE}"
-    curl -L "${NOZZLE_SOURCE}" --output "${NOZZLE_TGZ}"
+# echo
+# echo "###"
+# echo -e "\033[1;32m Building Wavefront nozzle \033[0m"
+# echo "###"
+# echo
+# (
+#     cd tmp
+#     echo "Downloading File '${NOZZLE_TGZ}' => ${NOZZLE_SOURCE}"
+#     curl -L "${NOZZLE_SOURCE}" --output "${NOZZLE_TGZ}"
 
-    tar -zxf "${NOZZLE_TGZ}"
-    mv cloud-foundry-nozzle-go* ../resources/cloud-foundry-nozzle-go
-)
+#     tar -zxf "${NOZZLE_TGZ}"
+#     mv cloud-foundry-nozzle-go* ../resources/cloud-foundry-nozzle-go
+# )
 
-echo
-echo "###"
-echo -e "\033[1;32m Building Wavefront Servicebroker \033[0m"
-echo "###"
-echo
+# echo
+# echo "###"
+# echo -e "\033[1;32m Building Wavefront Servicebroker \033[0m"
+# echo "###"
+# echo
 
-(
-    cd tmp
-    echo "Downloading File '${BROKER_TGZ}' => ${BROKER_SOURCE}"
-    curl -L "${BROKER_SOURCE}" --output "${BROKER_TGZ}"
+# (
+#     cd tmp
+#     echo "Downloading File '${BROKER_TGZ}' => ${BROKER_SOURCE}"
+#     curl -L "${BROKER_SOURCE}" --output "${BROKER_TGZ}"
 
-    tar -zxf "${BROKER_TGZ}"
+#     tar -zxf "${BROKER_TGZ}"
 
-    cd cloud-foundry-servicebroker-*
-    mvn ${MVN_OPTS} clean install -DskipTests
-    cp target/wavefront-cloudfoundry-broker-*-SNAPSHOT.jar ../../resources/wavefront-broker.jar
-)
+#     cd cloud-foundry-servicebroker-*
+#     mvn ${MVN_OPTS} clean install -DskipTests
+#     cp target/wavefront-cloudfoundry-broker-*-SNAPSHOT.jar ../../resources/wavefront-broker.jar
+# )
 
-# build proxy release
 echo
 echo "###"
 echo -e "\033[1;32m Building Proxy Bosh Release\033[0m"

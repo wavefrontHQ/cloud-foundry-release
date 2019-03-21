@@ -1,15 +1,15 @@
 ---
-name: wavefront-nozzle
-icon_file: resources/wavefront.png
-label: Wavefront by VMware Nozzle for PCF
+name: dev-wavefront-nozzle
+icon_file: resources/wavefront_red.png
+label: DEV - Wavefront by VMware Nozzle for PCF
 description: Wavefront proxy and firehose nozzle
 metadata_version: 1.8
 
-org: wavefront-nozzle-org
-space: wavefront-apps-space
+org: dev-wavefront-nozzle-org
+space: dev-wavefront-apps-space
 
 packages:
-- name: wavefront-proxy
+- name: dev-wavefront-proxy
   type: bosh-release
   label: Wavefront Proxy
   path: resources/proxy-bosh-release.tgz
@@ -32,58 +32,102 @@ packages:
   post_deploy: |
     cf set-quota $CF_ORG $CF_QUOTA_NAME
 
-- name: wavefront-service-broker
-  type: app-broker
-  label: Wavefront Service Broker
-  enable_global_access_to_plans: true
-  consumes:
-    proxy_conn:
-      from: proxy_conn
-  manifest:
-    path: resources/wavefront-broker.jar
-    buildpack: java_buildpack_offline
-    memory: 1G
-    instances: 1
-    env:
-      wavefront.proxy.port: 2878
-  post_deploy: |
-    cf set-env $APP_NAME WAVEFRONT_PROXY_HOSTNAME $PROXY_CONN_HOST
-    cf restage $APP_NAME
+# - name: wavefront-service-broker
+#   type: app-broker
+#   label: Wavefront Service Broker
+#   enable_global_access_to_plans: true
+#   consumes:
+#     proxy_conn:
+#       from: proxy_conn
+#   manifest:
+#     path: resources/wavefront-broker.jar
+#     buildpack: java_buildpack_offline
+#     memory: 1G
+#     instances: 1
+#     env:
+#       wavefront.proxy.port: 2878
+#   post_deploy: |
+#     cf set-env $APP_NAME WAVEFRONT_PROXY_HOSTNAME $PROXY_CONN_HOST
+#     cf restage $APP_NAME
 
-- name: wavefront-firehose-nozzle
-  type: app
-  label: Wavefront Firehose Nozzle
-  manifest:
-    path: resources/cloud-foundry-nozzle-go
-    buildpack: go_buildpack
-    health-check-type: process
-    memory: 2G
-    instances: 1
-    no-route: true
-    env:
-      GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
+# - name: wavefront-firehose-nozzle
+#   type: app
+#   label: Wavefront Firehose Nozzle
+#   manifest:
+#     path: resources/cloud-foundry-nozzle-go
+#     buildpack: go_buildpack
+#     health-check-type: process
+#     memory: 2G
+#     instances: 1
+#     no-route: true
+#     env:
+#       GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
 
-      NOZZLE_API_URL: (( .properties.pcf_host.value ))
-      NOZZLE_USERNAME: (( .properties.pcf_user.value ))
-      NOZZLE_PASSWORD: (( .properties.pcf_password.value ))
+#       NOZZLE_API_URL: (( .properties.pcf_host.value ))
+#       NOZZLE_USERNAME: (( .properties.pcf_user.value ))
+#       NOZZLE_PASSWORD: (( .properties.pcf_password.value ))
 
-      NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
-      NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
-      NOZZLE_SELECTED_EVENTS: ValueMetric,CounterEvent,ContainerMetric
+#       NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
+#       NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
+#       NOZZLE_SELECTED_EVENTS: ValueMetric,CounterEvent,ContainerMetric
 
-      WAVEFRONT_PROXY_PORT: 2878
-      WAVEFRONT_PREFIX: pcf
-      WAVEFRONT_FOUNDATION: (( .properties.custom_tag_foundation.value ))
-  post_deploy: |
-    cf set-env $APP_NAME WAVEFRONT_PROXY_ADDR $PROXY_CONN_HOST
-    cf restage $APP_NAME
+#       WAVEFRONT_PROXY_PORT: 2878
+#       WAVEFRONT_PREFIX: pcf
+#       WAVEFRONT_FOUNDATION: (( .properties.custom_tag_foundation.value ))
+#   post_deploy: |
+#     cf set-env $APP_NAME WAVEFRONT_PROXY_ADDR $PROXY_CONN_HOST
+#     cf restage $APP_NAME
+    
+
+# - name: dev-wavefront-telegraf
+#   type: bosh-release
+#   label: Wavefront Telegraf - test
+#   path: resources/telegraf-bosh-release.tgz
+#   consumes:
+#     proxy_conn:
+#       from: dev-wavefront-proxy
+#   jobs:
+#   - name: wavefront-telegraf
+#     templates:
+#     - name: wavefront-telegraf
+#       release: wavefront-telegraf
+#     memory: 4096
+#     cpu: 2
+#     static_ip: 0
+#     dynamic_ip: 1
+#     default_internet_connected: true
+#     properties:
+#       wavefront_port: 2878
+#   post_deploy: |
+#     cf set-quota $CF_ORG $CF_QUOTA_NAME
+
+- name: telegraf
+  type: bosh-release
+  path: resources/telegraf-bosh-release.tgz
+
+runtime_configs:
+- name: wf-telegraf
+  runtime_config:
+    releases:
+    - name: wavefront-telegraf
+      version: 0+dev.18
+    addons:
+    - name: telegraf-agent
+      consumes:
+        proxy_conn:
+          from: dev-wavefront-proxy
+      jobs:
+      - name: wavefront-telegraf
+        release: wavefront-telegraf
+      properties:
+        wavefront_port: 2878
 
 stemcell_criteria:
  os: 'ubuntu-xenial'
- version: '170'
+ version: '250'
 
 forms:
-- name: wavefront_proxy_properties
+- name: dev-wavefront_proxy_properties
   label: Wavefront Proxy Config
   description: Wavefront Proxy Configuration
   properties:
@@ -134,42 +178,42 @@ forms:
           description: User-defined point filtering and altering rules before data is sent to Wavefront
           optional: true
 
-- name: wavefront_nozzle_properties
-  label: Wavefront Firehose Nozzle Config
-  description: Wavefront Nozzle Configuration
-  properties:
-  - name: pcf_host
-    type: string
-    label: CF API Hostname
-    description: The CF API hostname such as api.YOUR-SYSTEM-DOMAIN
-    optional: false
-  - name: pcf_user
-    type: string
-    label: CF UAA Username
-    description: The CF UAA username with read-only access to the firehose and cloud controller
-    optional: false
-  - name: pcf_password
-    type: secret
-    label: CF UAA Password
-    description: The CF UAA password
-    optional: false
-  - name: custom_tag_foundation
-    type: string
-    label: PCF foundation name
-    description: A user friendly PCF foundation name. This is included as a point tag on the metrics sent to Wavefront.
-    optional: false
-  - name: pcf_skip_ssl_validation
-    type: boolean
-    label: Skip SSL Verification
-    default: false
-    description: Useful for testing environments where SSL is not properly setup. Should not be used in prod environments.
-  - name: filter_metrics_white_list
-    type: string_list
-    label: Metrics White List
-    optional: true
-    description: Comma separated list of glob patterns. Only metrics with names matching the whitelist are reported.
-  - name: filter_metrics_black_list
-    type: string_list
-    label: Metrics Black List
-    optional: true
-    description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.
+# - name: wavefront_nozzle_properties
+#   label: Wavefront Firehose Nozzle Config
+#   description: Wavefront Nozzle Configuration
+#   properties:
+#   - name: pcf_host
+#     type: string
+#     label: CF API Hostname
+#     description: The CF API hostname such as api.YOUR-SYSTEM-DOMAIN
+#     optional: false
+#   - name: pcf_user
+#     type: string
+#     label: CF UAA Username
+#     description: The CF UAA username with read-only access to the firehose and cloud controller
+#     optional: false
+#   - name: pcf_password
+#     type: secret
+#     label: CF UAA Password
+#     description: The CF UAA password
+#     optional: false
+#   - name: custom_tag_foundation
+#     type: string
+#     label: PCF foundation name
+#     description: A user friendly PCF foundation name. This is included as a point tag on the metrics sent to Wavefront.
+#     optional: false
+#   - name: pcf_skip_ssl_validation
+#     type: boolean
+#     label: Skip SSL Verification
+#     default: false
+#     description: Useful for testing environments where SSL is not properly setup. Should not be used in prod environments.
+#   - name: filter_metrics_white_list
+#     type: string_list
+#     label: Metrics White List
+#     optional: true
+#     description: Comma separated list of glob patterns. Only metrics with names matching the whitelist are reported.
+#   - name: filter_metrics_black_list
+#     type: string_list
+#     label: Metrics Black List
+#     optional: true
+#     description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.

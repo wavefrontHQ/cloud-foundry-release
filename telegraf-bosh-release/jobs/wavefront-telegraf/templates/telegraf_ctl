@@ -1,0 +1,40 @@
+#!/bin/bash
+
+set -e -u -x
+
+RUN_DIR=/var/vcap/sys/run/wavefront-telegraf
+LOG_DIR=/var/vcap/sys/log/wavefront-telegraf
+STORE_DIR=/var/vcap/store/wavefront-telegraf
+PACKAGE_DIR=/var/vcap/packages/wavefront-telegraf
+PIDFILE=$RUN_DIR/pid
+
+source $PACKAGE_DIR/pid_utils.sh
+
+case $1 in
+
+  start)
+    pid_guard $PIDFILE "telegraf"
+
+    mkdir -p $RUN_DIR $LOG_DIR $STORE_DIR
+    chown -R vcap:vcap $RUN_DIR $LOG_DIR $STORE_DIR
+
+    echo "$$" > $PIDFILE
+
+    exec chpst -u vcap:vcap $PACKAGE_DIR/telegraf \
+      -config=/var/vcap/jobs/wavefront-telegraf/config/telegraf.conf \
+      1>>$LOG_DIR/stdout.log \
+      2>>$LOG_DIR/stderr.log
+
+    ;;
+
+  stop)
+    kill_and_wait $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: $0 {start|stop}"
+
+    ;;
+
+esac

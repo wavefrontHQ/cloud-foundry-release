@@ -1,0 +1,8 @@
+---
+name: wavefront-telegraf
+
+dependencies: []
+
+files:
+- telegraf.tgz
+- pid_utils.sh

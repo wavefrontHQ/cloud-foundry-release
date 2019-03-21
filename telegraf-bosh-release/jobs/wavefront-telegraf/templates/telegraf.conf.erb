@@ -1,0 +1,46 @@
+[global_tags]
+  bosh-job = "<%= name %>"
+  bosh-deployment = "<%= spec.deployment %>"
+<% p("global_tags").each do |k, v| %>
+  <%= k %> = "<%= v %>"
+<% end %>
+
+[agent]
+  hostname = "<%= spec.ip %>"
+
+[[outputs.wavefront]]
+  host = "<%= link('proxy_conn').instances[0].address %>"
+  port = 2878
+
+
+# ---
+# proxy_conn = <%= link('proxy_conn') %>
+# ---
+# link('proxy_conn').instances[0] = <%= link('proxy_conn').instances[0] %>
+# ---
+# link('proxy_conn').instances[0].address = <%= link('proxy_conn').instances[0].address %>
+# ---
+# spec = "<%= spec %>"
+# ---
+# spec['properties'] = "<%= spec['properties'] %>"
+# ---
+
+
+[[inputs.cpu]]
+
+[[inputs.disk]]
+  ignore_fs = ["tmpfs", "devtmpfs", "devfs"]
+
+[[inputs.diskio]]
+
+[[inputs.kernel]]
+
+[[inputs.mem]]
+
+[[inputs.processes]]
+
+[[inputs.swap]]
+
+[[inputs.system]]
+
+[[inputs.net]]

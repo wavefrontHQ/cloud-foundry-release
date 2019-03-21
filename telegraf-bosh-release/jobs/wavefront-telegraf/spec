@@ -1,0 +1,34 @@
+---
+name: wavefront-telegraf
+
+templates:
+  telegraf_ctl: bin/telegraf_ctl
+  telegraf.conf.erb: config/telegraf.conf
+
+packages:
+- wavefront-telegraf
+
+consumes:
+- name: proxy_conn
+  type: proxy_conn
+
+properties:
+  global_tags:
+    description: |
+      Key-value tags to attach to every emitted metric. By default, 'bosh-job'
+      and 'bosh-deployment' tags will automatically be added.
+    default: {}
+    example: {datacenter: dc1}
+
+  wavefront_host:
+    description: |
+      Wavefront Proxy Host
+
+  wavefront_port:
+    description: |
+      Wavefront Proxy Port
+
+  wavefront_prefix:
+    description: |
+      Wavefront Proxy Prefix
+    default: ""
