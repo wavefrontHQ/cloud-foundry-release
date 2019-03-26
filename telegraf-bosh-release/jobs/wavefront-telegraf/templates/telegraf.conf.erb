@@ -1,24 +1,32 @@
 [global_tags]
   bosh-job = "<%= name %>"
   bosh-deployment = "<%= spec.deployment %>"
-<% p("global_tags").each do |k, v| %>
-  <%= k %> = "<%= v %>"
+<% p("global_tags").each do |tag| %>
+  <%= tag['name'] %> = "<%= tag['value'] %>"
 <% end %>
 
 [agent]
   hostname = "<%= spec.ip %>"
 
+<%
+  host = nil
+  if_p("wavefront_host") do |prop|
+    host = prop
+  end.else do
+    host = spec.ip
+  end
+
+  prefix = ""
+  if_p("wavefront_prefix") do |prop|
+    prefix = prop + ((prop.end_with?".") ?  "" : ".")
+  end
+%>
+
 [[outputs.wavefront]]
-  host = "<%= link('proxy_conn').instances[0].address %>"
-  port = 2878
+  host = "<%= host %>"
+  port = <%= p("wavefront_port") %>
+  prefix = "<%= prefix %>"
 
-
-# ---
-# proxy_conn = <%= link('proxy_conn') %>
-# ---
-# link('proxy_conn').instances[0] = <%= link('proxy_conn').instances[0] %>
-# ---
-# link('proxy_conn').instances[0].address = <%= link('proxy_conn').instances[0].address %>
 # ---
 # spec = "<%= spec %>"
 # ---

@@ -78,29 +78,6 @@ packages:
 #     cf set-env $APP_NAME WAVEFRONT_PROXY_ADDR $PROXY_CONN_HOST
 #     cf restage $APP_NAME
     
-
-# - name: dev-wavefront-telegraf
-#   type: bosh-release
-#   label: Wavefront Telegraf - test
-#   path: resources/telegraf-bosh-release.tgz
-#   consumes:
-#     proxy_conn:
-#       from: dev-wavefront-proxy
-#   jobs:
-#   - name: wavefront-telegraf
-#     templates:
-#     - name: wavefront-telegraf
-#       release: wavefront-telegraf
-#     memory: 4096
-#     cpu: 2
-#     static_ip: 0
-#     dynamic_ip: 1
-#     default_internet_connected: true
-#     properties:
-#       wavefront_port: 2878
-#   post_deploy: |
-#     cf set-quota $CF_ORG $CF_QUOTA_NAME
-
 - name: telegraf
   type: bosh-release
   path: resources/telegraf-bosh-release.tgz
@@ -110,17 +87,20 @@ runtime_configs:
   runtime_config:
     releases:
     - name: wavefront-telegraf
-      version: 0+dev.18
+      version: 0+dev.42
     addons:
     - name: telegraf-agent
-      consumes:
-        proxy_conn:
-          from: dev-wavefront-proxy
       jobs:
       - name: wavefront-telegraf
         release: wavefront-telegraf
       properties:
-        wavefront_port: 2878
+        wavefront_host: (( .properties.wavefront_host.value ))
+        wavefront_port: (( .properties.wavefront_port.value ))
+        wavefront_prefix: (( .properties.wavefront_prefix.value ))
+        global_tags: (( .properties.global_tags.value ))
+      include:
+        stemcell:
+        - os: ubuntu-xenial
 
 stemcell_criteria:
  os: 'ubuntu-xenial'
@@ -177,6 +157,43 @@ forms:
           label: Preprocessor Rules
           description: User-defined point filtering and altering rules before data is sent to Wavefront
           optional: true
+
+- name: wavefront_telegraf_properties
+  label: Wavefront Telegraf Config
+  description: Wavefront Telegraf Configuration
+  properties:
+  - name: wavefront_host
+    type: ip_address
+    label: Wavefront Proxy address
+    configurable: true
+    optional: true
+  - name: wavefront_port
+    type: integer
+    label: Wavefront Proxy port
+    configurable: true
+    optional: false
+    default: 2878
+  - name: wavefront_prefix
+    type: string
+    label: Metrics Prefix
+    configurable: true
+    optional: false
+    default: "pcf.bosh.vm"
+  - name: global_tags
+    label: "Global Tags"
+    description: 'will added to all metrics'
+    type: collection
+    configurable: true
+    optional: true
+    property_blueprints:
+    - name: name
+      label: Name
+      type: string
+      configurable: true
+    - name: value
+      label: Value
+      type: string
+      configurable: true
 
 # - name: wavefront_nozzle_properties
 #   label: Wavefront Firehose Nozzle Config

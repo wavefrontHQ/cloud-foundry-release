@@ -8,10 +8,6 @@ templates:
 packages:
 - wavefront-telegraf
 
-consumes:
-- name: proxy_conn
-  type: proxy_conn
-
 properties:
   global_tags:
     description: |
@@ -21,14 +17,13 @@ properties:
     example: {datacenter: dc1}
 
   wavefront_host:
-    description: |
-      Wavefront Proxy Host
+    description: Wavefront Proxy Host
 
   wavefront_port:
-    description: |
-      Wavefront Proxy Port
-
+    description: Wavefront Proxy Port
+    default: "2878"
+  
   wavefront_prefix:
     description: |
       Wavefront Proxy Prefix
-    default: ""
+    default: "pcf.bosh"
