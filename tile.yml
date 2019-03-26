@@ -18,6 +18,8 @@ packages:
     templates:
     - name: wavefront_proxy
       release: wavefront-proxy
+      # provides:
+      #   wf_proxy_info: {as: wf_proxy_info, shared: true}
     memory: 4096
     cpu: 2
     static_ip: 0
@@ -87,12 +89,16 @@ runtime_configs:
   runtime_config:
     releases:
     - name: wavefront-telegraf
-      version: 0+dev.42
+      version: 0+dev.59
     addons:
     - name: telegraf-agent
       jobs:
       - name: wavefront-telegraf
         release: wavefront-telegraf
+        consumes:
+          wf_proxy_info:
+            from: wf_proxy_info
+            deployment: (( ..cf.deployment_name ))
       properties:
         wavefront_host: (( .properties.wavefront_host.value ))
         wavefront_port: (( .properties.wavefront_port.value ))

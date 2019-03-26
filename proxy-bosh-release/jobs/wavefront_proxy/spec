@@ -12,8 +12,10 @@ packages:
 - wavefront_proxy_pkg
 
 provides:
-- name: proxy_conn
-  type: proxy_conn
+- name: wf_proxy_info
+  type: wf_proxy_info
+  properties:
+  - wavefront_push_listener_port
 
 properties: 
   wavefront_url:

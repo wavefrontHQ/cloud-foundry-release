@@ -8,6 +8,10 @@ templates:
 packages:
 - wavefront-telegraf
 
+consumes:
+- name: wf_proxy_info
+  type: wf_proxy_info
+
 properties:
   global_tags:
     description: |
