@@ -10,7 +10,7 @@ packages:
 
 consumes:
 - name: wf_proxy_info
-  type: wf_proxy_info
+  type: conn
 
 properties:
   global_tags:

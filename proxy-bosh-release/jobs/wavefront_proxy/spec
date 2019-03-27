@@ -13,7 +13,7 @@ packages:
 
 provides:
 - name: wf_proxy_info
-  type: wf_proxy_info
+  type: conn
   properties:
   - wavefront_push_listener_port
 
