@@ -5,3 +5,9 @@ tile-generator-env/*
 .DS_Store
 tmp
 wf_files
+*.pivotal
+nozzle_tile/product
+nozzle_tile/release
+tile.yml-E
+telegraf_tile/product
+telegraf_tile/release

@@ -1,6 +1,6 @@
 ---
 name: dev-wavefront-nozzle
-icon_file: resources/wavefront_red.png
+icon_file: ../resources/wavefront_red.png
 label: DEV - Wavefront by VMware Nozzle for PCF
 description: Wavefront proxy and firehose nozzle
 metadata_version: 1.8
@@ -12,7 +12,7 @@ packages:
 - name: dev-wavefront-proxy
   type: bosh-release
   label: Wavefront Proxy
-  path: resources/proxy-bosh-release.tgz
+  path: ../resources/proxy-bosh-release.tgz
   jobs:
   - name: wavefront_proxy
     templates:
@@ -42,7 +42,7 @@ packages:
 #     proxy_conn:
 #       from: proxy_conn
 #   manifest:
-#     path: resources/wavefront-broker.jar
+#     path: ../resources/wavefront-broker.jar
 #     buildpack: java_buildpack_offline
 #     memory: 1G
 #     instances: 1
@@ -56,7 +56,7 @@ packages:
 #   type: app
 #   label: Wavefront Firehose Nozzle
 #   manifest:
-#     path: resources/cloud-foundry-nozzle-go
+#     path: ../resources/cloud-foundry-nozzle-go
 #     buildpack: go_buildpack
 #     health-check-type: process
 #     memory: 2G
@@ -79,34 +79,6 @@ packages:
 #   post_deploy: |
 #     cf set-env $APP_NAME WAVEFRONT_PROXY_ADDR $PROXY_CONN_HOST
 #     cf restage $APP_NAME
-    
-- name: telegraf
-  type: bosh-release
-  path: resources/telegraf-bosh-release.tgz
-
-runtime_configs:
-- name: wf-telegraf
-  runtime_config:
-    releases:
-    - name: wavefront-telegraf
-      version: 0+dev.89
-    addons:
-    - name: telegraf-agent
-      jobs:
-      - name: wavefront-telegraf
-        release: wavefront-telegraf
-        consumes:
-          wf_proxy_info:
-            from: wf_proxy_info
-            deployment: dev-wavefront-nozzle-103bd65ec4bde7d0ffce
-      properties:
-        wavefront_host: (( .properties.wavefront_host.value ))
-        wavefront_port: (( .properties.wavefront_port.value ))
-        wavefront_prefix: (( .properties.wavefront_prefix.value ))
-        global_tags: (( .properties.global_tags.value ))
-      include:
-        stemcell:
-        - os: ubuntu-xenial
 
 stemcell_criteria:
  os: 'ubuntu-xenial'
@@ -163,43 +135,6 @@ forms:
           label: Preprocessor Rules
           description: User-defined point filtering and altering rules before data is sent to Wavefront
           optional: true
-
-- name: wavefront_telegraf_properties
-  label: Wavefront Telegraf Config
-  description: Wavefront Telegraf Configuration
-  properties:
-  - name: wavefront_host
-    type: ip_address
-    label: Wavefront Proxy address
-    configurable: true
-    optional: true
-  - name: wavefront_port
-    type: integer
-    label: Wavefront Proxy port
-    configurable: true
-    optional: false
-    default: 2878
-  - name: wavefront_prefix
-    type: string
-    label: Metrics Prefix
-    configurable: true
-    optional: false
-    default: "pcf.bosh.vm"
-  - name: global_tags
-    label: "Global Tags"
-    description: 'will added to all metrics'
-    type: collection
-    configurable: true
-    optional: true
-    property_blueprints:
-    - name: name
-      label: Name
-      type: string
-      configurable: true
-    - name: value
-      label: Value
-      type: string
-      configurable: true
 
 # - name: wavefront_nozzle_properties
 #   label: Wavefront Firehose Nozzle Config

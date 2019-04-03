@@ -1,0 +1,66 @@
+---
+name: dev-wavefront-telegraf
+icon_file: ../resources/wavefront_red.png
+label: DEV - Wavefront by VMware Telegraf
+description: Wavefront Telegraf
+metadata_version: 1.8
+
+packages:
+    
+- name: telegraf
+  type: bosh-release
+  path: ../resources/telegraf-bosh-release.tgz
+
+runtime_configs:
+- name: wf-telegraf
+  runtime_config:
+    releases:
+    - name: wavefront-telegraf
+      version: 0+dev.99 # UPDATE-ME
+    addons:
+    - name: telegraf-agent
+      jobs:
+      - name: wavefront-telegraf
+        release: wavefront-telegraf
+        consumes:
+          wf_proxy_info:
+            from: wf_proxy_info
+            deployment: (( ..dev-wavefront-nozzle.deployment_name ))
+      properties:
+        wavefront_prefix: (( .properties.wavefront_prefix.value ))
+        global_tags: (( .properties.global_tags.value ))
+      include:
+        stemcell:
+        - os: ubuntu-xenial
+
+stemcell_criteria:
+ os: 'ubuntu-xenial'
+ version: '250'
+
+forms:
+
+- name: wavefront_telegraf_properties
+  label: Wavefront Telegraf Config
+  description: Wavefront Telegraf Configuration
+  properties:
+  - name: wavefront_prefix
+    type: string
+    label: Metrics Prefix
+    configurable: true
+    optional: false
+    default: "pcf.bosh.vm"
+  - name: global_tags
+    label: "Global Tags"
+    description: 'will added to all metrics'
+    type: collection
+    configurable: true
+    optional: true
+    property_blueprints:
+    - name: name
+      label: Name
+      type: string
+      configurable: true
+    - name: value
+      label: Value
+      type: string
+      configurable: true

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 read -r -d '' BLOBS_FILES <<- EOM
 https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon.tar
@@ -150,11 +150,31 @@ echo
 
 echo
 echo "###"
-echo -e "\033[1;32m Building PCF Tile \033[0m"
+echo -e "\033[1;32m Building PCF Nozzle Tile \033[0m"
 echo "###"
 echo
 
-tile build
+(
+    cd nozzle_tile
+    tile build
+    cp product/*.pivotal ../
+)
+
+echo
+echo "###"
+echo -e "\033[1;32m Building PCF Telegraf Tile \033[0m"
+echo "###"
+echo
+
+(
+    VERSION_FILE=$(ls -rt telegraf-bosh-release/dev_releases/wavefront-telegraf/wavefront-telegraf-*.yml | tail -1)
+    VERSION=$(grep "version" ${VERSION_FILE} | head -1)
+    sed -i -E "s/version\:[^#]*# UPDATE-ME/${VERSION} # UPDATE-ME/g" telegraf_tile/tile.yml
+
+    cd telegraf_tile
+    tile build
+    cp product/*.pivotal ../
+)
 
 echo
 echo "###"
