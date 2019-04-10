@@ -9,22 +9,21 @@
   hostname = "<%= spec.ip %>"
 
 <%
-  host = nil
-  if_p("wavefront_host") do |prop|
-    host = prop
-  end.else do
-    host = spec.ip
+  info = nil
+  prefix = ""
+
+  if_link("wf_proxy_info") do |link|
+    info = link
   end
 
-  prefix = ""
   if_p("wavefront_prefix") do |prop|
     prefix = prop + ((prop.end_with?".") ?  "" : ".")
   end
 %>
 
 [[outputs.wavefront]]
-  host = "<%= host %>"
-  port = <%= p("wavefront_port") %>
+  host = "<%= info.instances[0].address %>"
+  port = <%= link('wf_proxy_info').properties["wavefront_push_listener_port"] %>
   prefix = "<%= prefix %>"
 
 # ---

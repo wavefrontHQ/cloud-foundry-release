@@ -16,7 +16,7 @@ runtime_configs:
   runtime_config:
     releases:
     - name: wavefront-telegraf
-      version: 0+dev.99 # UPDATE-ME
+      version: 0+dev.102 # UPDATE-ME
     addons:
     - name: telegraf-agent
       jobs:

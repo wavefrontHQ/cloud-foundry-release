@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 read -r -d '' BLOBS_FILES <<- EOM
 https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon.tar
@@ -50,6 +50,8 @@ done
 [ -f resources/proxy-bosh-release.tgz ] && rm resources/proxy-bosh-release.tgz
 [ -f resources/wavefront-broker.jar ] && rm resources/wavefront-broker.jar
 [ -d resources/cloud-foundry-nozzle-go ] && rm -rf resources/cloud-foundry-nozzle-go
+
+rm *.pivotal
 
 # rm telegraf-bosh-release/dev_releases/wavefront-telegraf/*
 
