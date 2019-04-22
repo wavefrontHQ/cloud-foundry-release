@@ -25,12 +25,13 @@ start)
       tar -xvf $archive
 
       cd $OPENJDK_HOME
-      archive=`ls openjdk*gz`
+      archive=`ls zulu*jdk*gz`
       tar -zxvf $archive
 
-      if [[ -d bin && `bin/java -Xmx64M -version 2>&1` =~ "OpenJDK 64-Bit Server" && $? == 0 ]]; then
-         export JRE_HOME=${OPENJDK_HOME}
-         export JAVA_BINARY=${JRE_HOME}/bin/java
+      export JRE_HOME=$(find ${OPENJDK_HOME} -type d -name "zulu*jdk*")
+      export JAVA_BINARY=${JRE_HOME}/bin/java
+
+      if [[ -d ${JRE_HOME}/bin && `${JRE_HOME}/bin/java -Xmx64M -version 2>&1` =~ "OpenJDK 64-Bit Server" && $? == 0 ]]; then
          cd ..
       else
          log_debug "JVM is not properly packaged"
