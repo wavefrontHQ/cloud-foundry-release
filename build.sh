@@ -2,7 +2,7 @@
 
 read -r -d '' BLOBS_FILES <<- EOM
 https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon.tar
-https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/openjdk-1.8.0_121.tar.gz
+https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/zulu8.38.0.13-ca-jdk8.0.212-linux_x64.tar.gz
 EOM
 
 set -e
@@ -10,7 +10,7 @@ set -e
 PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-4.36.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
-NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1-beta.5.tar.gz'
+NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.0.tar.gz'
 NOZZLE_TGZ='nozzle.tgz'
 
 BROKER_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-servicebroker/archive/0.9.3.tar.gz'
@@ -37,7 +37,7 @@ case $i in
 esac
 done
 
-[ "${FINAL}" == "NO" ] && BOSH_OPTS="--force"
+[ "${FINAL}" == "NO" ] && BOSH_OPTS="--force" || BOSH_OPTS="--final"
 [ "${DEBUG}" == "YES" ] && export BOSH_LOG_LEVEL=debug
 [ "${DEBUG}" == "YES" ] && MVN_OPTS='-B' || MVN_OPTS='-q'
 
@@ -133,7 +133,7 @@ echo -e "\033[1;32m Building PCF Tile \033[0m"
 echo "###"
 echo
 
-tile build
+tile build $@
 
 echo
 echo "###"

@@ -4,4 +4,4 @@ name: openjdk
 dependencies: []
 
 files:
-- openjdk-1.8.0_121.tar.gz
+- zulu8.38.0.13-ca-jdk8.0.212-linux_x64.tar.gz
