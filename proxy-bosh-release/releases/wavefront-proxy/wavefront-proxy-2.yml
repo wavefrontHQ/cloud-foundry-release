@@ -1,0 +1,25 @@
+name: wavefront-proxy
+version: "2"
+commit_hash: c0f7513
+uncommitted_changes: false
+jobs:
+- name: wavefront_proxy
+  version: 2619ea1a9db0b03c20eed04fe86dba74b8729c8a
+  fingerprint: 2619ea1a9db0b03c20eed04fe86dba74b8729c8a
+  sha1: 93aca9f2c905c237b79b7b4e5eb8ee18dc067a3f
+packages:
+- name: commons-daemon
+  version: 9e2079d20c85bbe782cb874b564d59c526544da9
+  fingerprint: 9e2079d20c85bbe782cb874b564d59c526544da9
+  sha1: 88449710d077b75e2614a75b9fee6d237b14bf9c
+  dependencies: []
+- name: openjdk
+  version: f739f44743565c1faf7a1213f23f3a8fcc95707a
+  fingerprint: f739f44743565c1faf7a1213f23f3a8fcc95707a
+  sha1: 582bcfd39c949365378ae70160f83b55a6e62867
+  dependencies: []
+- name: wavefront_proxy_pkg
+  version: 8513af82df26410560a392e9030cfdddc92b860b
+  fingerprint: 8513af82df26410560a392e9030cfdddc92b860b
+  sha1: b5c971f202a93128429de8a052ca1724afc84f08
+  dependencies: []
