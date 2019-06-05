@@ -50,10 +50,10 @@ done
 
 echo
 echo "###"
-echo -e "\033[1;32m Donwloading dependecies \033[0m"
+echo -e "\033[1;32m Downloading dependencies \033[0m"
 echo "###"
 echo
-# get proxy release fileS
+# get proxy release files
 (
     cd proxy-bosh-release/blobs
     for url in ${BLOBS_FILES}; do
@@ -86,7 +86,7 @@ echo
 
 echo
 echo "###"
-echo -e "\033[1;32m Building Wavefront nozzle \033[0m"
+echo -e "\033[1;32m Building Wavefront Nozzle \033[0m"
 echo "###"
 echo
 (
@@ -100,7 +100,7 @@ echo
 
 echo
 echo "###"
-echo -e "\033[1;32m Building Wavefront Servicebroker \033[0m"
+echo -e "\033[1;32m Building Wavefront Service Broker \033[0m"
 echo "###"
 echo
 
