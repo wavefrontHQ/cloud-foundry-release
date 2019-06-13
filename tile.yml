@@ -62,6 +62,7 @@ packages:
     no-route: true
     env:
       GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
+      GOVERSION: 1.11
 
       NOZZLE_API_URL: (( .properties.pcf_host.value ))
       NOZZLE_USERNAME: (( .properties.pcf_user.value ))
