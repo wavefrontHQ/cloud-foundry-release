@@ -10,7 +10,8 @@ set -e
 PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-4.36.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
-NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.0.tar.gz'
+# NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.debug.1.tar.gz'
+NOZZLE_SOURCE='/Users/glaullon/go/src/github.com/wavefronthq/cloud-foundry-nozzle-go/'
 NOZZLE_TGZ='nozzle.tgz'
 
 BROKER_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-servicebroker/archive/0.9.3.tar.gz'
@@ -114,10 +115,17 @@ echo "###"
 echo
 (
     cd tmp
-    echo "Downloading File '${NOZZLE_TGZ}' => ${NOZZLE_SOURCE}"
-    curl -L "${NOZZLE_SOURCE}" --output "${NOZZLE_TGZ}"
+    if [[ -d ${NOZZLE_SOURCE} ]]; then
+        [ "${FINAL}" == "YES" ] && echo "For final tile use Git release" && exit
+        echo "Copying files '${NOZZLE_SOURCE}' => $(pwd)"
+        mkdir cloud-foundry-nozzle-go
+        cp -r ${NOZZLE_SOURCE} cloud-foundry-nozzle-go/
+    else
+        echo "Downloading File '${NOZZLE_TGZ}' => ${NOZZLE_SOURCE}"
+        curl -L "${NOZZLE_SOURCE}" --output "${NOZZLE_TGZ}"
+        tar -zxf "${NOZZLE_TGZ}"
+    fi
 
-    tar -zxf "${NOZZLE_TGZ}"
     mv cloud-foundry-nozzle-go* ../resources/cloud-foundry-nozzle-go
 )
 
