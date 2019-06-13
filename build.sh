@@ -45,6 +45,14 @@ done
 [ "${DEBUG}" == "YES" ] && export BOSH_LOG_LEVEL=debug
 [ "${DEBUG}" == "YES" ] && MVN_OPTS='-B' || MVN_OPTS='-q'
 
+# Checking 'tile' binary version
+currentver=$(tile -v | cut -d" " -f3)
+requiredver=13.1
+ if [ "$(printf '%s\n' "${requiredver}" "${currentver}" | sort -V | head -n1)" != "${requiredver}" ]; then 
+        echo "'tile' binary version '${currentver}' is older than '${requiredver}', please update it"
+        exit
+ fi
+
 # Checking tile version format
 re='^[0-9]+.[0-9]+.[0-9]+$'
 if [[ ${VERSION} =~ $re ]]; then
