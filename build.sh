@@ -116,10 +116,11 @@ echo
 (
     cd tmp
     if [[ -d ${NOZZLE_SOURCE} ]]; then
-        [ "${FINAL}" == "YES" ] && echo "For final tile use Git release" && exit
+        [ "${FINAL}" == "YES" ] && echo "For final tile use Nozzle Git release" && exit -1
         echo "Copying files '${NOZZLE_SOURCE}' => $(pwd)"
         mkdir cloud-foundry-nozzle-go
         cp -r ${NOZZLE_SOURCE} cloud-foundry-nozzle-go/
+        rm -rf cloud-foundry-nozzle-go/vendor
     else
         echo "Downloading File '${NOZZLE_TGZ}' => ${NOZZLE_SOURCE}"
         curl -L "${NOZZLE_SOURCE}" --output "${NOZZLE_TGZ}"
