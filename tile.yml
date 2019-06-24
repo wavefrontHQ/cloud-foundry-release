@@ -58,7 +58,7 @@ packages:
     buildpack: go_buildpack
     health-check-type: process
     memory: 2G
-    instances: 1
+    instances: (( .properties.instances.value ))
     no-route: true
     env:
       GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
@@ -70,7 +70,7 @@ packages:
 
       NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
       NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
-      NOZZLE_SELECTED_EVENTS: ValueMetric,CounterEvent,ContainerMetric
+      NOZZLE_SELECTED_EVENTS: (( .properties.selected_events.value ))
 
       WAVEFRONT_PROXY_PORT: 2878
       WAVEFRONT_PREFIX: pcf
@@ -174,3 +174,24 @@ forms:
     label: Metrics Black List
     optional: true
     description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.
+
+- name: advanced_conf
+  label: Advanced Nozzle Config
+  description: Advanced Nozzle Configuration
+  properties:
+  - name: instances
+    type: integer
+    label: Number of Nozzle app Instaces
+    default: 1
+  - name: selected_events
+    label: Events/Metrics to Subscribe
+    type: multi_select_options
+    configurable: true
+    default: ['ValueMetric', 'CounterEvent', 'ContainerMetric']
+    options:
+    - name: ValueMetric
+      label: 'Value Metrics'
+    - name: CounterEvent
+      label: 'Counter Events'
+    - name: ContainerMetric
+      label: 'Container Metrics'
