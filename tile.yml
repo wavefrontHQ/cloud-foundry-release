@@ -195,3 +195,25 @@ forms:
       label: 'Counter Events'
     - name: ContainerMetric
       label: 'Container Metrics'
+  - name: nozzle_proxy_selector
+    type: selector
+    label: Wavefront Proxy configuration
+    default: "Default"
+    configurable: true
+    option_templates:
+      - name: default
+        select_value: default
+        label: "Default proxy"
+        property_blueprints: []
+      - name: custom
+        select_value: custom
+        label: "Custom proxy"
+        property_blueprints:
+        - name: custom_wf_proxy_addr
+          type: network_address
+          label: Proxy Addr
+          description: Proxy managed by this PCF Foundation
+        - name: custom_wf_proxy_port
+          type: integer
+          label: Proxy port
+          description: Proxy managed by you
