@@ -20,6 +20,8 @@ DOWNLOAD=NO
 DEBUG=NO
 FINAL=NO    #will use '--force' on bosh command
 
+[ -f version.txt ] && VERSION=$(cat version.txt)
+
 for i in "$@"; do
 case $i in
     --DEBUG)
@@ -34,12 +36,34 @@ case $i in
     FINAL=YES
     shift
     ;;
+    *)
+    VERSION=$i
 esac
 done
 
 [ "${FINAL}" == "NO" ] && BOSH_OPTS="--force" || BOSH_OPTS="--final"
+[ "${FINAL}" == "YES" ] && git clean -xdf
 [ "${DEBUG}" == "YES" ] && export BOSH_LOG_LEVEL=debug
 [ "${DEBUG}" == "YES" ] && MVN_OPTS='-B' || MVN_OPTS='-q'
+
+# Checking 'tile' binary version
+currentver=$(tile -v | cut -d" " -f3)
+requiredver=13.1
+ if [ "$(printf '%s\n' "${requiredver}" "${currentver}" | sort -V | head -n1)" != "${requiredver}" ]; then 
+        echo "'tile' binary version '${currentver}' is older than '${requiredver}', please update it"
+        exit
+ fi
+
+# Checking tile version format
+re='^[0-9]+.[0-9]+.[0-9]+$'
+if [[ ${VERSION} =~ $re ]]; then
+    TS=$(date +%s)
+    [ "${FINAL}" == "NO" ] && VERSION=${VERSION}-dev.${TS}
+else
+    echo "Incorrect version format, use X.X.X"
+    exit -1
+fi
+echo "Using version: '${VERSION}'"
 
 [ -d "tmp" ] && rm -rf tmp/* || mkdir -p tmp
 
@@ -55,6 +79,7 @@ echo "###"
 echo
 # get proxy release files
 (
+    mkdir -p proxy-bosh-release/blobs
     cd proxy-bosh-release/blobs
     for url in ${BLOBS_FILES}; do
         file=$(echo "${url##*/}")
@@ -124,7 +149,7 @@ echo "###"
 echo
 (
     cd proxy-bosh-release
-    bosh create-release $BOSH_OPTS --name wavefront-proxy --tarball ../resources/proxy-bosh-release.tgz
+    bosh create-release $BOSH_OPTS --version ${VERSION} --name wavefront-proxy --tarball ../resources/proxy-bosh-release.tgz
 )
 
 echo
@@ -133,10 +158,11 @@ echo -e "\033[1;32m Building PCF Tile \033[0m"
 echo "###"
 echo
 
-tile build $@
+tile build ${VERSION}
 
 echo
 echo "###"
 echo -e "\033[1;32m Done \033[0m"
 echo "###"
 echo
+
