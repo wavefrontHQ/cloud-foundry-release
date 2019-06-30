@@ -47,7 +47,6 @@ done
 [ "${DEBUG}" == "YES" ] && MVN_OPTS='-B' || MVN_OPTS='-q'
 
 # Checking 'tile' binary version
-
 get_tile_latest_release() {
   curl --silent "https://api.github.com/repos/cf-platform-eng/tile-generator/releases/latest" | # Get latest release from GitHub api
     grep '"tag_name":' |                                                                        # Get tag line
