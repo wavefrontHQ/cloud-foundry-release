@@ -9,10 +9,11 @@ RUN_DIR=/var/vcap/sys/run/wavefront_proxy
 DEBUG_LOG=$LOG_DIR/wavefront-proxy-start.log
 PIDFILE=$RUN_DIR/wavefront-proxy.pid
 SPOOL_DIR=/var/vcap/data/spool/wavefront-proxy/
+TMP_DIR=/var/vcap/data/spool/wavefront-proxy/tmp
 ID_DIR=/var/vcap/data/wavefront-proxy
 
-mkdir -p $LOG_DIR $RUN_DIR $SPOOL_DIR $ID_DIR
-chown -R vcap:vcap "$LOG_DIR" "$RUN_DIR" "$SPOOL_DIR" "$ID_DIR"
+mkdir -p $LOG_DIR $RUN_DIR $SPOOL_DIR $ID_DIR $TMP_DIR
+chown -R vcap:vcap "$LOG_DIR" "$RUN_DIR" "$SPOOL_DIR" "$ID_DIR" "$TMP_DIR"
 
 function log_debug() {
   echo `date` $1 >> $DEBUG_LOG
@@ -40,6 +41,8 @@ start)
       log_debug "Located Java Binary at: ${JAVA_BINARY}"
       su vcap -c "$COMMONS_DAEMON/commons-daemon/src/native/unix/jsvc -user vcap -home $JRE_HOME -cp $PROXY_DIR/wavefront-proxy.jar \
             -XX:+AggressiveHeap -Xss2049k -XX:OnOutOfMemoryError=\"kill -1 %p\" \
+            -Djava.io.tmpdir=${TMP_DIR} \
+            -Dio.netty.native.workdir=${TMP_DIR} \
             -Dlog4j.configurationFile=/var/vcap/jobs/wavefront_proxy/conf/log4j2.xml \
             -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
             -errfile $LOG_DIR/wavefront-error.log \
@@ -50,6 +53,8 @@ start)
 stop)
       su vcap -c "$COMMONS_DAEMON/commons-daemon/src/native/unix/jsvc -user vcap -home $OPENJDK_HOME -cp $PROXY_DIR/wavefront-proxy.jar \
             -XX:+AggressiveHeap -Xss2049k -XX:OnOutOfMemoryError=\"kill -1 %p\" \
+            -Djava.io.tmpdir=${TMP_DIR} \
+            -Dio.netty.native.workdir=${TMP_DIR} \
             -Dlog4j.configurationFile=/var/vcap/jobs/wavefront_proxy/conf/log4j2.xml \
             -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
             -errfile $LOG_DIR/wavefront-error.log \
