@@ -11,10 +11,11 @@ PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-4.36.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
 # NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.debug.1.tar.gz'
-NOZZLE_SOURCE='/Users/glaullon/go/src/github.com/wavefronthq/cloud-foundry-nozzle-go/'
+NOZZLE_SOURCE="${HOME}/go/src/github.com/wavefronthq/cloud-foundry-nozzle-go/"
 NOZZLE_TGZ='nozzle.tgz'
 
 BROKER_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-servicebroker/archive/0.9.3.tar.gz'
+BROKER_SOURCE="${HOME}/wavefront/cloud-foundry-servicebroker/"
 BROKER_TGZ='broker.tgz'
 
 DOWNLOAD=NO
@@ -145,12 +146,18 @@ echo
 
 (
     cd tmp
-    echo "Downloading File '${BROKER_TGZ}' => ${BROKER_SOURCE}"
-    curl -L "${BROKER_SOURCE}" --output "${BROKER_TGZ}"
+    if [[ -d ${BROKER_SOURCE} ]]; then
+        echo "Copying files '${BROKER_SOURCE}' => $(pwd)"
+        mkdir cloud-foundry-servicebroker
+        cp -r ${BROKER_SOURCE} cloud-foundry-servicebroker/
+    else
+        echo "Downloading File '${BROKER_TGZ}' => ${BROKER_SOURCE}"
+        curl -L "${BROKER_SOURCE}" --output "${BROKER_TGZ}"
+        tar -zxf "${BROKER_TGZ}"
+        mv cloud-foundry-servicebroker-* cloud-foundry-servicebroker
+    fi
 
-    tar -zxf "${BROKER_TGZ}"
-
-    cd cloud-foundry-servicebroker-*
+    cd cloud-foundry-servicebroker
     mvn ${MVN_OPTS} clean install -DskipTests
     cp target/wavefront-cloudfoundry-broker-*-SNAPSHOT.jar ../../resources/wavefront-broker.jar
 )
