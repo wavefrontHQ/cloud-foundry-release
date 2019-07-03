@@ -47,10 +47,17 @@ done
 [ "${DEBUG}" == "YES" ] && MVN_OPTS='-B' || MVN_OPTS='-q'
 
 # Checking 'tile' binary version
+
+get_tile_latest_release() {
+  curl --silent "https://api.github.com/repos/cf-platform-eng/tile-generator/releases/latest" | # Get latest release from GitHub api
+    grep '"tag_name":' |                                                                        # Get tag line
+    sed -E 's/.*"v([^"]+)".*/\1/'                                                                # Pluck JSON value
+}
+
 currentver=$(tile -v | cut -d" " -f3)
-requiredver=13.1
+requiredver=$(get_tile_latest_release)
  if [ "$(printf '%s\n' "${requiredver}" "${currentver}" | sort -V | head -n1)" != "${requiredver}" ]; then 
-        echo "'tile' binary version '${currentver}' is older than '${requiredver}', please update it"
+        echo "'tile' binary version '${currentver}' is older than '${requiredver}', please update it. https://github.com/cf-platform-eng/tile-generator/releases/latest"
         exit
  fi
 
