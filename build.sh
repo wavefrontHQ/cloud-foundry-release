@@ -7,7 +7,7 @@ EOM
 
 set -e
 
-PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-4.36.tar.gz'
+PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-4.38.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
 NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.1.tar.gz'
