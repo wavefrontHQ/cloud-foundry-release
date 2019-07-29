@@ -111,7 +111,7 @@ forms:
     optional: false
   - name: custom_config_selector
     type: selector
-    label: Custom Proxy configuration
+    label: Custom Proxy Configuration
     default: "Default"
     configurable: true
     option_templates:
@@ -165,7 +165,7 @@ forms:
     description: Useful for testing environments where SSL is not properly setup. Should not be used in prod environments.
   - name: advanced_config
     type: selector
-    label: Modify advanced options
+    label: Advanced Nozzle Options
     default: "no"
     configurable: true
     option_templates:
@@ -189,7 +189,7 @@ forms:
           description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.
         - name: instances
           type: integer
-          label: Number of Nozzle app Instaces
+          label: Number of Nozzle App Instances
           default: 1
         - name: selected_events
           label: Events/Metrics to Subscribe
@@ -205,9 +205,9 @@ forms:
             label: 'Container Metrics'
         - name: custom_wf_proxy_addr
           type: network_address
-          label: Custom Proxy Addr
+          label: Custom Proxy Address
           optional: true
         - name: custom_wf_proxy_port
           type: integer
-          label: Custom Proxy port
+          label: Custom Proxy Port
           optional: true
