@@ -35,8 +35,8 @@ preprocessorConfigFile=/var/vcap/jobs/wavefront_proxy/conf/preprocessor_rules.ya
 <% 
 if cfg && (cfg.length > 0)
     keywords = ['server', 'hostname', 'token', 'pushListenerPorts', 'opentsdbPorts', 
-    'idFile', 'buffer', 'preprocessorConfigFile','histogramStateDirectory',
-    'traceListenerPorts','histogramDistListenerPorts'].join('=|')
+                'idFile', 'buffer', 'preprocessorConfigFile','histogramStateDirectory',
+                'traceListenerPorts','histogramDistListenerPorts'].join('=|')
     cfg = cfg.gsub(/(#{keywords})/,'#\1') %>
 <%= cfg %>
 <% end %>

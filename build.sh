@@ -44,6 +44,7 @@ esac
 done
 
 [ "${FINAL}" == "NO" ] && BOSH_OPTS="--force" || BOSH_OPTS="--final"
+[ "${FINAL}" == "YES" ] && git clean -xdf
 [ "${DEBUG}" == "YES" ] && export BOSH_LOG_LEVEL=debug
 [ "${DEBUG}" == "YES" ] && MVN_OPTS='-B' || MVN_OPTS='-q'
 
@@ -87,6 +88,7 @@ echo "###"
 echo
 # get proxy release files
 (
+    mkdir -p proxy-bosh-release/blobs
     cd proxy-bosh-release/blobs
     for url in ${BLOBS_FILES}; do
         file=$(echo "${url##*/}")

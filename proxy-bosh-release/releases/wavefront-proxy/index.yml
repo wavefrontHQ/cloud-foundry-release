@@ -1,6 +1,10 @@
 builds:
   29841033-afe2-436e-7874-402c34552d82:
     version: "2"
+  a1f1bd44-eb85-4f13-561a-d7c6b0014a9d:
+    version: 1.0.1
+  a4b54b98-7739-4d53-6b78-34e766986ca4:
+    version: 1.0.2
   a8f6909d-6f69-4a05-6b38-cd173a1373ee:
     version: "1"
 format-version: "2"
