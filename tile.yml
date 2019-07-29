@@ -58,10 +58,11 @@ packages:
     buildpack: go_buildpack
     health-check-type: process
     memory: 2G
-    instances: 1
+    instances: (( .properties.advanced_config.advanced.instances.value ))
     no-route: true
     env:
       GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
+      GOVERSION: 1.11
 
       NOZZLE_API_URL: (( .properties.pcf_host.value ))
       NOZZLE_USERNAME: (( .properties.pcf_user.value ))
@@ -69,7 +70,6 @@ packages:
 
       NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
       NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
-      NOZZLE_SELECTED_EVENTS: ValueMetric,CounterEvent,ContainerMetric
 
       WAVEFRONT_PROXY_PORT: 2878
       WAVEFRONT_PREFIX: pcf
@@ -163,13 +163,51 @@ forms:
     label: Skip SSL Verification
     default: false
     description: Useful for testing environments where SSL is not properly setup. Should not be used in prod environments.
-  - name: filter_metrics_white_list
-    type: string_list
-    label: Metrics White List
-    optional: true
-    description: Comma separated list of glob patterns. Only metrics with names matching the whitelist are reported.
-  - name: filter_metrics_black_list
-    type: string_list
-    label: Metrics Black List
-    optional: true
-    description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.
+  - name: advanced_config
+    type: selector
+    label: Modify advanced options
+    default: "no"
+    configurable: true
+    option_templates:
+      - name: normal
+        select_value: "no"
+        label: "No"
+        property_blueprints: []
+      - name: advanced
+        select_value: "yes"
+        label: "Yes"
+        property_blueprints:
+        - name: filter_metrics_white_list
+          type: string_list
+          label: Metrics White List
+          optional: true
+          description: Comma separated list of glob patterns. Only metrics with names matching the whitelist are reported.
+        - name: filter_metrics_black_list
+          type: string_list
+          label: Metrics Black List
+          optional: true
+          description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.
+        - name: instances
+          type: integer
+          label: Number of Nozzle app Instaces
+          default: 1
+        - name: selected_events
+          label: Events/Metrics to Subscribe
+          type: multi_select_options
+          configurable: true
+          default: ['ValueMetric', 'CounterEvent', 'ContainerMetric']
+          options:
+          - name: ValueMetric
+            label: 'Value Metrics'
+          - name: CounterEvent
+            label: 'Counter Events'
+          - name: ContainerMetric
+            label: 'Container Metrics'
+        - name: custom_wf_proxy_addr
+          type: network_address
+          label: Custom Proxy Addr
+          optional: true
+        - name: custom_wf_proxy_port
+          type: integer
+          label: Custom Proxy port
+          optional: true
