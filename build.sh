@@ -113,7 +113,7 @@ echo
 
     tar -zxf "${PROXY_TGZ}"
 
-    cd java*
+    cd wavefront-proxy-wavefront*
     mvn ${MVN_OPTS} clean install -DskipTests
     cp proxy/target/proxy-*-uber.jar ../../proxy-bosh-release/src/wavefront-proxy.jar
 )
