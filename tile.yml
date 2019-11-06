@@ -133,6 +133,7 @@ forms:
           label: Preprocessor Rules
           description: User-defined point filtering and altering rules before data is sent to Wavefront
           optional: true
+          configurable: true
 
 - name: wavefront_nozzle_properties
   label: Wavefront Firehose Nozzle Config
@@ -181,16 +182,19 @@ forms:
           type: string_list
           label: Metrics White List
           optional: true
+          configurable: true
           description: Comma separated list of glob patterns. Only metrics with names matching the whitelist are reported.
         - name: filter_metrics_black_list
           type: string_list
           label: Metrics Black List
           optional: true
+          configurable: true
           description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.
         - name: instances
           type: integer
           label: Number of Nozzle App Instances
           default: 1
+          configurable: true
         - name: selected_events
           label: Events/Metrics to Subscribe
           type: multi_select_options
@@ -207,7 +211,9 @@ forms:
           type: network_address
           label: Custom Proxy Address
           optional: true
+          configurable: true
         - name: custom_wf_proxy_port
           type: integer
           label: Custom Proxy Port
           optional: true
+          configurable: true
