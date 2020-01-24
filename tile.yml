@@ -67,7 +67,6 @@ packages:
       NOZZLE_USERNAME: (( .properties.pcf_user.value ))
       NOZZLE_PASSWORD: (( .properties.pcf_password.value ))
       NOZZLE_LOG_STREAM_URL: (( .properties.pcf_log_stream.value ))
-      NOZZLE_LEGACY: (( .properties.pcf_log_stream.value ))
 
       NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
       NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))

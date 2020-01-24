@@ -5,9 +5,7 @@ pushListenerPorts=<%= p("wavefront_push_listener_port") %>
 opentsdbPorts=<%= p("wavefront_opentsdb_port") %>
 idFile=/var/vcap/data/wavefront-proxy/.wavefront_id
 buffer=/var/vcap/data/spool/wavefront-proxy/buffer
-histogramStateDirectory=/var/vcap/data/spool/wavefront-proxy
 traceListenerPorts=30000
-histogramDistListenerPorts=40000
 
 <%
 selector = p("custom_config_selector")
@@ -35,8 +33,8 @@ preprocessorConfigFile=/var/vcap/jobs/wavefront_proxy/conf/preprocessor_rules.ya
 <% 
 if cfg && (cfg.length > 0)
     keywords = ['server', 'hostname', 'token', 'pushListenerPorts', 'opentsdbPorts', 
-                'idFile', 'buffer', 'preprocessorConfigFile','histogramStateDirectory',
-                'traceListenerPorts','histogramDistListenerPorts'].join('=|')
+                'idFile', 'buffer', 'preprocessorConfigFile',
+                'traceListenerPorts'].join('=|')
     cfg = cfg.gsub(/(#{keywords})/,'#\1') %>
 <%= cfg %>
 <% end %>
