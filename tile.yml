@@ -66,6 +66,7 @@ packages:
       NOZZLE_API_URL: (( .properties.pcf_host.value ))
       NOZZLE_USERNAME: (( .properties.pcf_user.value ))
       NOZZLE_PASSWORD: (( .properties.pcf_password.value ))
+      NOZZLE_LOG_STREAM_URL: (( .properties.pcf_log_stream.value ))
 
       NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
       NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
@@ -141,7 +142,8 @@ forms:
   - name: pcf_host
     type: string
     label: CF API Hostname
-    description: The CF API hostname such as api.YOUR-SYSTEM-DOMAIN
+    description: The CF API hostname such as 'https://api.YOUR-SYSTEM-DOMAIN'
+    placeholder: https://api.YOUR-SYSTEM-DOMAIN
     optional: false
   - name: pcf_user
     type: string
@@ -152,6 +154,12 @@ forms:
     type: secret
     label: CF UAA Password
     description: The CF UAA password
+    optional: false
+  - name: pcf_log_stream
+    type: string
+    label: CF API log stream url
+    description: The CF API log stream url such as 'https://log-stream.YOUR-SYSTEM-DOMAIN'
+    placeholder: https://log-stream.YOUR-SYSTEM-DOMAIN
     optional: false
   - name: custom_tag_foundation
     type: string
@@ -194,18 +202,6 @@ forms:
           label: Number of Nozzle App Instances
           default: 1
           configurable: true
-        - name: selected_events
-          label: Events/Metrics to Subscribe
-          type: multi_select_options
-          configurable: true
-          default: ['ValueMetric', 'CounterEvent', 'ContainerMetric']
-          options:
-          - name: ValueMetric
-            label: 'Value Metrics'
-          - name: CounterEvent
-            label: 'Counter Events'
-          - name: ContainerMetric
-            label: 'Container Metrics'
         - name: custom_wf_proxy_addr
           type: network_address
           label: Custom Proxy Address
@@ -216,3 +212,21 @@ forms:
           label: Custom Proxy Port
           optional: true
           configurable: true
+        - name: legacy_mode
+          type: boolean
+          label: Use Legacy Mode
+          default: false
+          description: Use a deprecated PCF API to gather metrics (will ignore 'CF API log stream url' option)
+          configurable: true
+        - name: selected_events
+          label: Events/Metrics to Subscribe (Only Legacy Mode)
+          type: multi_select_options
+          configurable: true
+          default: ['ValueMetric', 'CounterEvent', 'ContainerMetric']
+          options:
+          - name: ValueMetric
+            label: 'Value Metrics'
+          - name: CounterEvent
+            label: 'Counter Events'
+          - name: ContainerMetric
+            label: 'Container Metrics'
