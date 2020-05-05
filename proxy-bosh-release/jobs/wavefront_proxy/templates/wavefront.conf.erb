@@ -12,6 +12,7 @@ selector = p("custom_config_selector")
 if (selector.has_key? 'selected_option') && selector['selected_option']
     cfg = selector['selected_option']['custom_config']
     rules = selector['selected_option']['wavefront_preprocessor_rules']
+    logsIngestion = selector['selected_option']['wavefront_logs_ingestion']
 end 
 %>
 
@@ -28,6 +29,11 @@ persistMessages=false
 
 <% if rules && (rules.length > 0) %>
 preprocessorConfigFile=/var/vcap/jobs/wavefront_proxy/conf/preprocessor_rules.yaml
+<% end %>
+
+<% if logsIngestion && (logsIngestion.length > 0) %>
+rawLogsPort=5045
+logsIngestionConfigFile=/var/vcap/jobs/wavefront_proxy/conf/logsIngestion.yaml
 <% end %>
 
 <% 
