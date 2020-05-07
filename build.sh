@@ -129,15 +129,20 @@ echo
         [ "${FINAL}" == "YES" ] && echo "For final tile use Nozzle Git release" && exit -1
         echo "Copying files '${NOZZLE_SOURCE}' => $(pwd)"
         mkdir cloud-foundry-nozzle-go
-        cp -r ${NOZZLE_SOURCE} cloud-foundry-nozzle-go/
-        rm -rf cloud-foundry-nozzle-go/vendor
+        cp -r ${NOZZLE_SOURCE} ../resources/cloud-foundry-nozzle-go
     else
         echo "Downloading File '${NOZZLE_TGZ}' => ${NOZZLE_SOURCE}"
         curl -L "${NOZZLE_SOURCE}" --output "${NOZZLE_TGZ}"
         tar -zxf "${NOZZLE_TGZ}"
+        mkdir -p src/github.com/wavefronthq
+        mv cloud-foundry-nozzle-go* src/github.com/wavefronthq/cloud-foundry-nozzle-go
+        tmp=$(pwd)
+        cd src/github.com/wavefronthq/cloud-foundry-nozzle-go
+        GOPATH=${tmp} dep ensure
+        cd ..
+        cp -r cloud-foundry-nozzle-go ${tmp}/../resources/cloud-foundry-nozzle-go
     fi
 
-    mv cloud-foundry-nozzle-go* ../resources/cloud-foundry-nozzle-go
 )
 
 echo
