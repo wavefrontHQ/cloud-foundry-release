@@ -134,6 +134,12 @@ forms:
           description: User-defined point filtering and altering rules before data is sent to Wavefront
           optional: true
           configurable: true
+        - name: wavefront_logs_ingestion
+          type: text
+          label: Logs Ingestion Config
+          description: User-defined Logs Ingestion Config
+          optional: true
+          configurable: true
 
 - name: wavefront_nozzle_properties
   label: Wavefront Firehose Nozzle Config

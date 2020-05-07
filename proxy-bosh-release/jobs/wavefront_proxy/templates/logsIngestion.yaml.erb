@@ -1,0 +1,10 @@
+<%
+selector = p("custom_config_selector")
+if (selector.has_key? 'selected_option') && selector['selected_option']
+    logsIngestion = selector['selected_option']['wavefront_logs_ingestion']
+end
+%>
+
+<%if logsIngestion && (logsIngestion.length > 0 )%>
+<%= logsIngestion %>
+<% end %>
