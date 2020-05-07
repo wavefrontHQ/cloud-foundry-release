@@ -63,17 +63,18 @@ packages:
     env:
       GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
 
-      NOZZLE_API_URL: (( .properties.pcf_host.value ))
-      NOZZLE_USERNAME: (( .properties.pcf_user.value ))
-      NOZZLE_PASSWORD: (( .properties.pcf_password.value ))
-      NOZZLE_LOG_STREAM_URL: (( .properties.pcf_log_stream.value ))
+      NOZZLE_API_URL: https://api.(( ..cf.cloud_controller.system_domain.value ))
+      NOZZLE_USERNAME: admin
+      NOZZLE_PASSWORD: (( ..cf.uaa.admin_credentials.password ))
+      NOZZLE_LOG_STREAM_URL: https://log-stream.(( ..cf.cloud_controller.system_domain.value ))
 
-      NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
-      NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
+      NOZZLE_FIREHOSE_SUBSCRIPTION_ID: wf-firehose-subscription-id
+      NOZZLE_SKIP_SSL: true
 
       WAVEFRONT_PROXY_PORT: 2878
       WAVEFRONT_PREFIX: pcf
-      WAVEFRONT_FOUNDATION: (( .properties.custom_tag_foundation.value ))
+      WAVEFRONT_FOUNDATION: (( ..cf.cloud_controller.system_domain.value ))
+
   post_deploy: |
     cf set-env $APP_NAME WAVEFRONT_PROXY_ADDR $PROXY_CONN_HOST
     cf restage $APP_NAME
@@ -145,38 +146,6 @@ forms:
   label: Wavefront Firehose Nozzle Config
   description: Wavefront Nozzle Configuration
   properties:
-  - name: pcf_host
-    type: string
-    label: CF API Hostname
-    description: The CF API hostname such as 'https://api.YOUR-SYSTEM-DOMAIN'
-    placeholder: https://api.YOUR-SYSTEM-DOMAIN
-    optional: false
-  - name: pcf_user
-    type: string
-    label: CF UAA Username
-    description: The CF UAA username with read-only access to the firehose and cloud controller
-    optional: false
-  - name: pcf_password
-    type: secret
-    label: CF UAA Password
-    description: The CF UAA password
-    optional: false
-  - name: pcf_log_stream
-    type: string
-    label: CF API log stream url
-    description: The CF API log stream url such as 'https://log-stream.YOUR-SYSTEM-DOMAIN'
-    placeholder: https://log-stream.YOUR-SYSTEM-DOMAIN
-    optional: false
-  - name: custom_tag_foundation
-    type: string
-    label: PCF foundation name
-    description: A user friendly PCF foundation name. This is included as a point tag on the metrics sent to Wavefront.
-    optional: false
-  - name: pcf_skip_ssl_validation
-    type: boolean
-    label: Skip SSL Verification
-    default: false
-    description: Useful for testing environments where SSL is not properly setup. Should not be used in prod environments.
   - name: advanced_config
     type: selector
     label: Advanced Nozzle Options
