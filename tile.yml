@@ -9,15 +9,22 @@ org: wavefront-nozzle-org
 space: wavefront-apps-space
 
 packages:
+- name: uaa_crud
+  type: bosh-release
+  path: resources/uaa-crud-release.tgz
+
 - name: wavefront-proxy
   type: bosh-release
   label: Wavefront Proxy
   path: resources/proxy-bosh-release.tgz
+
   jobs:
   - name: wavefront_proxy
     templates:
     - name: wavefront_proxy
       release: wavefront-proxy
+    - name: uaa_create
+      release: uaa_crud
     memory: 4096
     cpu: 2
     static_ip: 0
@@ -29,6 +36,16 @@ packages:
       wavefront_push_listener_port: 2878
       wavefront_opentsdb_port: 4242
       friendly_hostname: (( .properties.friendly_hostname.value ))
+      uaacrud:
+        endpoint: https://uaa.(( ..cf.cloud_controller.system_domain.value ))
+        admin_identity: (( ..cf.uaa.tile_installer_client_credentials.identity ))
+        admin_secret: (( ..cf.uaa.tile_installer_client_credentials.password ))
+        target_client_identity: wavefront-nozzel
+        target_client_secret: wavefront-nozzel-passsssssss
+        client_grant_types: "client_credentials, refresh_token"
+        client_scopes: ""
+        client_authorities: "doppler.firehose,cloud_controller.admin_read_only"
+        token_validity: 10000
   post_deploy: |
     cf set-quota $CF_ORG $CF_QUOTA_NAME
 
@@ -64,8 +81,8 @@ packages:
       GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
 
       NOZZLE_API_URL: https://api.(( ..cf.cloud_controller.system_domain.value ))
-      NOZZLE_USERNAME: admin
-      NOZZLE_PASSWORD: (( ..cf.uaa.admin_credentials.password ))
+      NOZZLE_USERNAME: wavefront-nozzel
+      NOZZLE_PASSWORD: wavefront-nozzel-passsssssss
       NOZZLE_LOG_STREAM_URL: https://log-stream.(( ..cf.cloud_controller.system_domain.value ))
 
       NOZZLE_FIREHOSE_SUBSCRIPTION_ID: wf-firehose-subscription-id
@@ -80,8 +97,8 @@ packages:
     cf restage $APP_NAME
 
 stemcell_criteria:
- os: 'ubuntu-xenial'
- version: '250'
+  os: 'ubuntu-xenial'
+  version: '250'
 
 forms:
 - name: wavefront_proxy_properties
