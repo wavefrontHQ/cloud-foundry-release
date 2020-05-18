@@ -40,8 +40,8 @@ packages:
         endpoint: https://uaa.(( ..cf.cloud_controller.system_domain.value ))
         admin_identity: (( ..cf.uaa.tile_installer_client_credentials.identity ))
         admin_secret: (( ..cf.uaa.tile_installer_client_credentials.password ))
-        target_client_identity: wavefront-nozzel
-        target_client_secret: (( .properties.pcf_password.value ))
+        target_client_identity: (( .properties.nozzle_credentials.identity ))
+        target_client_secret: (( .properties.nozzle_credentials.password ))
         client_grant_types: "client_credentials, refresh_token"
         client_scopes: ""
         client_authorities: "doppler.firehose,cloud_controller.admin_read_only"
@@ -81,8 +81,8 @@ packages:
       GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
 
       NOZZLE_API_URL: https://api.(( ..cf.cloud_controller.system_domain.value ))
-      NOZZLE_USERNAME: wavefront-nozzel
-      NOZZLE_PASSWORD: (( .properties.pcf_password.value ))
+      NOZZLE_USERNAME: (( .properties.nozzle_credentials.identity ))
+      NOZZLE_PASSWORD: (( .properties.nozzle_credentials.password ))
       NOZZLE_LOG_STREAM_URL: https://log-stream.(( ..cf.cloud_controller.system_domain.value ))
 
       NOZZLE_FIREHOSE_SUBSCRIPTION_ID: wf-firehose-subscription-id
@@ -163,9 +163,12 @@ forms:
   label: Wavefront Firehose Nozzle Config
   description: Wavefront Nozzle Configuration
   properties:
-  - name: pcf_password
-    type: secret
+  - name: nozzle_credentials
+    label: Wavefront Nozzle credentials
+    type: simple_credentials
     configurable: false
+    default:
+      identity: wavefront_nozzel
   - name: custom_tag_foundation
     type: string
     label: PCF foundation name
