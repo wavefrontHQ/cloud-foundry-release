@@ -71,6 +71,9 @@ packages:
       NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
       NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
 
+      NOZZLE_CHANNEL_SIZE: (( .properties.queue_size.value ))
+      NOZZLE_WORKERS: (( .properties.workers.value ))
+
       WAVEFRONT_PROXY_PORT: 2878
       WAVEFRONT_PREFIX: pcf
       WAVEFRONT_FOUNDATION: (( .properties.custom_tag_foundation.value ))
@@ -207,6 +210,16 @@ forms:
           type: integer
           label: Number of Nozzle App Instances
           default: 1
+          configurable: true
+        - name: workers
+          type: integer
+          label: Number of Nozzle Workers
+          default: 1
+          configurable: true
+        - name: queue_size
+          type: integer
+          label: Size of Nozzle ingress Queue
+          default: 1000
           configurable: true
         - name: custom_wf_proxy_addr
           type: network_address
