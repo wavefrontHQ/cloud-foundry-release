@@ -214,12 +214,12 @@ forms:
         - name: workers
           type: integer
           label: Number of Nozzle Workers
-          default: 1
+          default: 2
           configurable: true
         - name: queue_size
           type: integer
           label: Size of Nozzle ingress Queue
-          default: 1000
+          default: 10000
           configurable: true
         - name: custom_wf_proxy_addr
           type: network_address
