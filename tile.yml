@@ -71,8 +71,8 @@ packages:
       NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
       NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
 
-      NOZZLE_CHANNEL_SIZE: (( .properties.queue_size.value ))
-      NOZZLE_WORKERS: (( .properties.workers.value ))
+      NOZZLE_CHANNEL_SIZE: (( .properties.advanced_config.advanced.queue_size.value ))
+      NOZZLE_WORKERS: (( .properties.advanced_config.advanced.workers.value ))
 
       WAVEFRONT_PROXY_PORT: 2878
       WAVEFRONT_PREFIX: pcf
