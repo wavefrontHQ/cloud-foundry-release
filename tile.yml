@@ -57,8 +57,8 @@ packages:
     path: resources/cloud-foundry-nozzle-go
     buildpack: go_buildpack
     health-check-type: process
-    memory: 2G
-    instances: (( .properties.advanced_config.advanced.instances.value ))
+    memory: (( .properties.advanced_config.advanced.memory.value || 2G ))
+    instances: (( .properties.advanced_config.advanced.instances.value || 1 ))
     no-route: true
     env:
       GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
@@ -211,6 +211,15 @@ forms:
           label: Number of Nozzle App Instances
           default: 1
           configurable: true
+        - name: memory
+          type: string
+          default: 2G
+          label: Nozzle App Instances memory
+          description: "Format: must be an integer followed by either an M, for megabytes, or G, for gigabytes. (2G, 512M)" 
+          configurable: true
+          constraints:
+          - must_match_regex: '^[\d]+[GM]$'
+            error_message: 'Memory must be an integer followed by either an M, for megabytes, or G, for gigabytes. (2G, 512M)'
         - name: workers
           type: integer
           label: Number of Nozzle Workers
