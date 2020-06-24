@@ -83,7 +83,7 @@ packages:
 
 stemcell_criteria:
  os: 'ubuntu-xenial'
- version: '250'
+ version: '621.76'
 
 forms:
 - name: wavefront_proxy_properties
