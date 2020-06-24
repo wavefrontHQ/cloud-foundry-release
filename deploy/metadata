@@ -1,0 +1,5 @@
+---
+opsmgr:
+    url: https://pcf.iceberg.cf-app.com
+    username: pivotalcf
+    password: kyucfio8evsmyye5
