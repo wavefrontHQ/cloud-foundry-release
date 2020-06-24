@@ -7,11 +7,11 @@ EOM
 
 set -e
 
-PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-5.7.tar.gz'
+PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-8.1.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
-NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.2.1.tar.gz'
-# NOZZLE_SOURCE="${HOME}/go/src/github.com/wavefronthq/cloud-foundry-nozzle-go/"
+# NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.2.1.tar.gz'
+NOZZLE_SOURCE="${HOME}/go/src/github.com/wavefronthq/cloud-foundry-nozzle-go/"
 NOZZLE_TGZ='nozzle.tgz'
 
 BROKER_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-servicebroker/archive/0.9.5.tar.gz'
@@ -127,9 +127,13 @@ echo
     cd tmp
     if [[ -d ${NOZZLE_SOURCE} ]]; then
         [ "${FINAL}" == "YES" ] && echo "For final tile use Nozzle Git release" && exit -1
-        echo "Copying files '${NOZZLE_SOURCE}' => $(pwd)"
-        mkdir cloud-foundry-nozzle-go
+        echo "Copying files '${NOZZLE_SOURCE}' => $(pwd)/../resources/cloud-foundry-nozzle-go"
         cp -r ${NOZZLE_SOURCE} ../resources/cloud-foundry-nozzle-go
+        (
+            cd ../resources/cloud-foundry-nozzle-go
+            rm -rf vendor
+            go mod vendor
+        )
     else
         echo "Downloading File '${NOZZLE_TGZ}' => ${NOZZLE_SOURCE}"
         curl -L "${NOZZLE_SOURCE}" --output "${NOZZLE_TGZ}"
@@ -138,7 +142,7 @@ echo
         mv cloud-foundry-nozzle-go* src/github.com/wavefronthq/cloud-foundry-nozzle-go
         tmp=$(pwd)
         cd src/github.com/wavefronthq/cloud-foundry-nozzle-go
-        GOPATH=${tmp} dep ensure
+        GOPATH=${tmp} go mod vendor
         cd ..
         cp -r cloud-foundry-nozzle-go ${tmp}/../resources/cloud-foundry-nozzle-go
     fi
