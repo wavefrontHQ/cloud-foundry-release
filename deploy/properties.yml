@@ -1,15 +1,11 @@
 ---
-wavefront_url: https://nimba.wavefront.com/api
-wavefront_token: 33a0e409-8851-4574-b5c8-09833d90457c
-friendly_hostname: proxy-pc
+wavefront_url: https://.........wavefront.com/api
+wavefront_token: ........
+friendly_hostname: proxy-pcf
 cf_quota_name: runaway
 
-pcf_host: https://api.sys.iceberg.cf-app.com
-pcf_user: admin
-pcf_password: { 'secret': "V6jNOr9QbZO2twbi_QuqQyHwDxHAUcw-" }
-pcf_log_stream: https://log-stream.sys.iceberg.cf-app.com
-pcf_skip_ssl_validation: true
-custom_tag_foundation: "iceberg.cf-app.com"
+custom_tag_foundation: "........"
+
 advanced_config: "yes"
 advanced_config.advanced.instances: 2
 advanced_config.advanced.memory: 3G
