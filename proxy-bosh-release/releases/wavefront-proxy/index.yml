@@ -21,4 +21,6 @@ builds:
     version: "1"
   bf26ce8b-28f3-4cbc-7b98-c23b05836cb7:
     version: 2.0.0
+  db3e0ed1-e67e-48b3-66a3-db7a2b288d78:
+    version: 3.0.0
 format-version: "2"
