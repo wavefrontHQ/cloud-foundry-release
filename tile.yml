@@ -92,7 +92,7 @@ packages:
       NOZZLE_WORKERS: (( .properties.advanced_config.advanced.workers.value ))
 
       WAVEFRONT_PROXY_PORT: 2878
-      WAVEFRONT_PREFIX: pcf
+      WAVEFRONT_PREFIX: (( .properties.advanced_config.advanced.metrics_prefix.value ))
       WAVEFRONT_FOUNDATION: (( .properties.custom_tag_foundation.value ))
 
   post_deploy: |
@@ -232,6 +232,12 @@ forms:
           label: Size of Nozzle ingress Queue
           default: 10000
           configurable: true
+        - name: metrics_prefix
+          type: string
+          label: Prefix of all metrics
+          default: pcf
+          configurable: true
+          description: Out-of-the-box integration dashboards and integrations metrics tracking are dependent on the default prefix.
         - name: custom_wf_proxy_addr
           type: network_address
           label: Custom Proxy Address
