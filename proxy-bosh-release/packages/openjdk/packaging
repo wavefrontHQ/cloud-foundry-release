@@ -1,7 +1,7 @@
 # abort script on any command that exit with a non zero value
 set -e
 
-archive=`echo zulu*jdk*tar.gz`
+archive="openjdk-11+28_linux-x64_bin.tar.gz"
 
 if [[ -f $archive ]] ; then
   echo "Archive found"

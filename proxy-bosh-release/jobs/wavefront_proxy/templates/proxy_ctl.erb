@@ -19,27 +19,36 @@ function log_debug() {
   echo `date` $1 >> $DEBUG_LOG
 }
 
+cd $COMMONS_DAEMON
+archive=`ls commons-daemon-1.2.3-bin.tar.gz`
+tar -zxvf $archive
+
+cd $OPENJDK_HOME
+archive="openjdk-11+28_linux-x64_bin.tar.gz"
+tar -zxvf $archive
+
+export JRE_HOME=$(find ${OPENJDK_HOME} -type d -name "jdk-11")
+export JAVA_BINARY=${JRE_HOME}/bin/java
+
+version=$(${JRE_HOME}/bin/java -Xmx64M -version 2>&1)
+
+log_debug $(uname -a)
+
+if [[ -d ${JRE_HOME}/bin && ${version} =~ "OpenJDK 64-Bit Server" && $? == 0 ]]; then
+      log_debug "Located Java Binary at: ${JAVA_BINARY}"
+      cd ..
+else
+      log_debug "JVM is not properly packaged"
+      exit 1
+fi
+
+JSVC=${COMMONS_DAEMON}/jsvc
+
+log_debug "${1}"
+
 case "$1" in
 start)
-      cd $COMMONS_DAEMON
-      archive=`ls commons-daemon.tar`
-      tar -xvf $archive
-
-      cd $OPENJDK_HOME
-      archive=`ls zulu*jdk*gz`
-      tar -zxvf $archive
-
-      export JRE_HOME=$(find ${OPENJDK_HOME} -type d -name "zulu*jdk*")
-      export JAVA_BINARY=${JRE_HOME}/bin/java
-
-      if [[ -d ${JRE_HOME}/bin && `${JRE_HOME}/bin/java -Xmx64M -version 2>&1` =~ "OpenJDK 64-Bit Server" && $? == 0 ]]; then
-         cd ..
-      else
-         log_debug "JVM is not properly packaged"
-         exit 1
-      fi
-      log_debug "Located Java Binary at: ${JAVA_BINARY}"
-      su vcap -c "$COMMONS_DAEMON/commons-daemon/src/native/unix/jsvc -user vcap -home $JRE_HOME -cp $PROXY_DIR/wavefront-proxy.jar \
+      su vcap -c "${JSVC} -user vcap -home $JRE_HOME -cp $PROXY_DIR/wavefront-proxy.jar \
             -XX:+AggressiveHeap -Xss2049k -XX:OnOutOfMemoryError=\"kill -1 %p\" \
             -Djava.io.tmpdir=${TMP_DIR} \
             -Dio.netty.native.workdir=${TMP_DIR} \
@@ -51,7 +60,7 @@ start)
       log_debug "Started Successfully"
 ;;
 stop)
-      su vcap -c "$COMMONS_DAEMON/commons-daemon/src/native/unix/jsvc -user vcap -home $OPENJDK_HOME -cp $PROXY_DIR/wavefront-proxy.jar \
+      su vcap -c "${JSVC} -user vcap -home $OPENJDK_HOME -cp $PROXY_DIR/wavefront-proxy.jar \
             -XX:+AggressiveHeap -Xss2049k -XX:OnOutOfMemoryError=\"kill -1 %p\" \
             -Djava.io.tmpdir=${TMP_DIR} \
             -Dio.netty.native.workdir=${TMP_DIR} \
@@ -61,6 +70,7 @@ stop)
             -pidfile $PIDFILE -wait 20 -debug -stop com.wavefront.agent.WavefrontProxyService \
             -f /var/vcap/jobs/wavefront_proxy/conf/wavefront.conf 2>> $LOG_DIR/wavefront.err.log"
       rm -f $PIDFILE
+      log_debug "Stoped Successfully"
 ;;
 *)
         echo "Usage: $0 {start | stop}"

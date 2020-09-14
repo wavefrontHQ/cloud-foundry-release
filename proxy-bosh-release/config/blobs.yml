@@ -1,6 +1,9 @@
-commons-daemon.tar:
-  size: 2099200
-  sha: 99212c9fb83091dcddfde9af9791f7665d6426f2
-zulu8.38.0.13-ca-jdk8.0.212-linux_x64.tar.gz:
-  size: 77827592
-  sha: 788999f9735e7792ae238795e7da67681521509e
+commons-daemon-1.2.3-bin.tar.gz:
+  size: 174682
+  sha: be7848a5c64fddb184e8a03e2e6e7b4075e70425
+openjdk-11+28_linux-x64_bin.tar.gz:
+  size: 187611826
+  sha: 3784cfc4670f0d4c5482604c7c513beb1a92b005f569df9bf100e8bef6610f2e
+jsvc:
+  size: 48416
+  sha: 5d0fe2c48893477e53140dda142f834813a682ba

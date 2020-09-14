@@ -1,13 +1,13 @@
 #!/bin/bash
 
 read -r -d '' BLOBS_FILES <<- EOM
-https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon.tar
-https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/zulu8.38.0.13-ca-jdk8.0.212-linux_x64.tar.gz
+http://apache.uvigo.es//commons/daemon/binaries/commons-daemon-1.2.3-bin.tar.gz
+https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_linux-x64_bin.tar.gz
 EOM
 
 set -e
 
-PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-8.2.tar.gz'
+PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-9.2.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
 NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.3.0.tar.gz'
