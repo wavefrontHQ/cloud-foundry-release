@@ -1,8 +1,9 @@
 #!/bin/bash
+# A Simple Shell Script to Build Nozzle for PCF
 
 read -r -d '' BLOBS_FILES <<- EOM
-http://apache.uvigo.es//commons/daemon/binaries/commons-daemon-1.2.3-bin.tar.gz
-https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_linux-x64_bin.tar.gz
+https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon-1.2.3-bin.tar.gz
+https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/openjdk-11+28_linux-x64_bin.tar.gz
 EOM
 
 set -e

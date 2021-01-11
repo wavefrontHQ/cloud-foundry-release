@@ -70,7 +70,7 @@ stop)
             -pidfile $PIDFILE -wait 20 -debug -stop com.wavefront.agent.WavefrontProxyService \
             -f /var/vcap/jobs/wavefront_proxy/conf/wavefront.conf 2>> $LOG_DIR/wavefront.err.log"
       rm -f $PIDFILE
-      log_debug "Stoped Successfully"
+      log_debug "Stopped Successfully"
 ;;
 *)
         echo "Usage: $0 {start | stop}"
