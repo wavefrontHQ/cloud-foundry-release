@@ -171,7 +171,7 @@ forms:
     type: simple_credentials
     configurable: false
     default:
-      identity: wavefront_nozzel
+      identity: wavefront_nozzle
   - name: custom_tag_foundation
     type: string
     label: PCF foundation name

@@ -1,4 +1,5 @@
 #!/bin/bash
+# A Simple Shell Script to Deploy Nozzle for PCF
 set -e
 
 parse_yaml() {
