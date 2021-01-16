@@ -4,6 +4,7 @@
 read -r -d '' BLOBS_FILES <<- EOM
 https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon-1.2.3-bin.tar.gz
 https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/openjdk-11+28_linux-x64_bin.tar.gz
+https://wavefront-cdn.s3-us-west-2.amazonaws.com/pcf/bosh-artifacts/jsvc-1.2.3.zip
 EOM
 
 set -e
@@ -97,6 +98,10 @@ echo
         if [ ! -f "${file}" ]; then
             echo "Downloading File '${file}' => ${url}"
             curl -L "${url}" --output ${file}
+            if [[ "${file}" == jsvc* ]]; then
+                [ -f "jsvc" ] && rm jsvc
+                tar xvf ${file}
+            fi
         fi
     done
 )
