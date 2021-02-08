@@ -4,5 +4,6 @@ name: commons-daemon
 dependencies: []
 
 files:
-- commons-daemon.tar
+- commons-daemon-1.2.3-bin.tar.gz
+- jsvc
 

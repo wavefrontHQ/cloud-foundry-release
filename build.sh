@@ -1,16 +1,18 @@
 #!/bin/bash
+# A Simple Shell Script to Build Nozzle for PCF
 
 read -r -d '' BLOBS_FILES <<- EOM
-https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon.tar
-https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/zulu8.38.0.13-ca-jdk8.0.212-linux_x64.tar.gz
+https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon-1.2.3-bin.tar.gz
+https://wavefront-cdn.s3-us-west-2.amazonaws.com/pcf/bosh-artifacts/openjdk-11_28_linux-x64_bin.tar.gz
+https://wavefront-cdn.s3-us-west-2.amazonaws.com/pcf/bosh-artifacts/jsvc-1.2.3.zip
 EOM
 
 set -e
 
-PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-5.7.tar.gz'
+PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-9.2.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
-NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.2.1.tar.gz'
+NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.3.0.tar.gz'
 # NOZZLE_SOURCE="${HOME}/go/src/github.com/wavefronthq/cloud-foundry-nozzle-go/"
 NOZZLE_TGZ='nozzle.tgz'
 
@@ -92,10 +94,17 @@ echo
     cd proxy-bosh-release/blobs
     for url in ${BLOBS_FILES}; do
         file=$(echo "${url##*/}")
+        if [[ "${file}" == openjdk* ]]; then
+            file="openjdk-11+28_linux-x64_bin.tar.gz"
+        fi
         [ "${DOWNLOAD}" == "YES" ] && rm ${file}
         if [ ! -f "${file}" ]; then
             echo "Downloading File '${file}' => ${url}"
             curl -L "${url}" --output ${file}
+            if [[ "${file}" == jsvc* ]]; then
+                [ -f "jsvc" ] && rm jsvc
+                tar xvf ${file}
+            fi
         fi
     done
 )
@@ -127,9 +136,13 @@ echo
     cd tmp
     if [[ -d ${NOZZLE_SOURCE} ]]; then
         [ "${FINAL}" == "YES" ] && echo "For final tile use Nozzle Git release" && exit -1
-        echo "Copying files '${NOZZLE_SOURCE}' => $(pwd)"
-        mkdir cloud-foundry-nozzle-go
+        echo "Copying files '${NOZZLE_SOURCE}' => $(pwd)/../resources/cloud-foundry-nozzle-go"
         cp -r ${NOZZLE_SOURCE} ../resources/cloud-foundry-nozzle-go
+        (
+            cd ../resources/cloud-foundry-nozzle-go
+            rm -rf vendor
+            go mod vendor
+        )
     else
         echo "Downloading File '${NOZZLE_TGZ}' => ${NOZZLE_SOURCE}"
         curl -L "${NOZZLE_SOURCE}" --output "${NOZZLE_TGZ}"
@@ -138,7 +151,7 @@ echo
         mv cloud-foundry-nozzle-go* src/github.com/wavefronthq/cloud-foundry-nozzle-go
         tmp=$(pwd)
         cd src/github.com/wavefronthq/cloud-foundry-nozzle-go
-        GOPATH=${tmp} dep ensure
+        GOPATH=${tmp} go mod vendor
         cd ..
         cp -r cloud-foundry-nozzle-go ${tmp}/../resources/cloud-foundry-nozzle-go
     fi

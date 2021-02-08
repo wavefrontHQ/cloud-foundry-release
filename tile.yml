@@ -9,15 +9,22 @@ org: wavefront-nozzle-org
 space: wavefront-apps-space
 
 packages:
+- name: uaa_crud
+  type: bosh-release
+  path: resources/uaa-crud-release.tgz
+
 - name: wavefront-proxy
   type: bosh-release
   label: Wavefront Proxy
   path: resources/proxy-bosh-release.tgz
+
   jobs:
   - name: wavefront_proxy
     templates:
     - name: wavefront_proxy
       release: wavefront-proxy
+    - name: uaa_create
+      release: uaa_crud
     memory: 4096
     cpu: 2
     static_ip: 0
@@ -29,6 +36,16 @@ packages:
       wavefront_push_listener_port: 2878
       wavefront_opentsdb_port: 4242
       friendly_hostname: (( .properties.friendly_hostname.value ))
+      uaacrud:
+        endpoint: https://uaa.(( ..cf.cloud_controller.system_domain.value ))
+        admin_identity: (( ..cf.uaa.tile_installer_client_credentials.identity ))
+        admin_secret: (( ..cf.uaa.tile_installer_client_credentials.password ))
+        target_client_identity: (( .properties.nozzle_credentials.identity ))
+        target_client_secret: (( .properties.nozzle_credentials.password ))
+        client_grant_types: "client_credentials, refresh_token"
+        client_scopes: ""
+        client_authorities: "doppler.firehose,cloud_controller.admin_read_only"
+        token_validity: 10000
   post_deploy: |
     cf set-quota $CF_ORG $CF_QUOTA_NAME
 
@@ -57,18 +74,18 @@ packages:
     path: resources/cloud-foundry-nozzle-go
     buildpack: go_buildpack
     health-check-type: process
-    memory: 2G
-    instances: (( .properties.advanced_config.advanced.instances.value ))
+    memory: (( .properties.advanced_config.advanced.memory.value || 2G ))
+    instances: (( .properties.advanced_config.advanced.instances.value || 1 ))
     no-route: true
     env:
       GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
 
-      NOZZLE_API_URL: (( .properties.pcf_host.value ))
-      NOZZLE_USERNAME: (( .properties.pcf_user.value ))
-      NOZZLE_PASSWORD: (( .properties.pcf_password.value ))
-      NOZZLE_LOG_STREAM_URL: (( .properties.pcf_log_stream.value ))
+      NOZZLE_API_URL: https://api.(( ..cf.cloud_controller.system_domain.value ))
+      NOZZLE_USERNAME: (( .properties.nozzle_credentials.identity ))
+      NOZZLE_PASSWORD: (( .properties.nozzle_credentials.password ))
+      NOZZLE_LOG_STREAM_URL: https://log-stream.(( ..cf.cloud_controller.system_domain.value ))
 
-      NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
+      NOZZLE_FIREHOSE_SUBSCRIPTION_ID: wf-firehose-subscription-id
       NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
 
       NOZZLE_CHANNEL_SIZE: (( .properties.advanced_config.advanced.queue_size.value ))
@@ -77,13 +94,14 @@ packages:
       WAVEFRONT_PROXY_PORT: 2878
       WAVEFRONT_PREFIX: (( .properties.advanced_config.advanced.metrics_prefix.value ))
       WAVEFRONT_FOUNDATION: (( .properties.custom_tag_foundation.value ))
+
   post_deploy: |
     cf set-env $APP_NAME WAVEFRONT_PROXY_ADDR $PROXY_CONN_HOST
     cf restage $APP_NAME
 
 stemcell_criteria:
  os: 'ubuntu-xenial'
- version: '250'
+ version: '621.76'
 
 forms:
 - name: wavefront_proxy_properties
@@ -148,28 +166,12 @@ forms:
   label: Wavefront Firehose Nozzle Config
   description: Wavefront Nozzle Configuration
   properties:
-  - name: pcf_host
-    type: string
-    label: CF API Hostname
-    description: The CF API hostname such as 'https://api.YOUR-SYSTEM-DOMAIN'
-    placeholder: https://api.YOUR-SYSTEM-DOMAIN
-    optional: false
-  - name: pcf_user
-    type: string
-    label: CF UAA Username
-    description: The CF UAA username with read-only access to the firehose and cloud controller
-    optional: false
-  - name: pcf_password
-    type: secret
-    label: CF UAA Password
-    description: The CF UAA password
-    optional: false
-  - name: pcf_log_stream
-    type: string
-    label: CF API log stream url
-    description: The CF API log stream url such as 'https://log-stream.YOUR-SYSTEM-DOMAIN'
-    placeholder: https://log-stream.YOUR-SYSTEM-DOMAIN
-    optional: false
+  - name: nozzle_credentials
+    label: Wavefront Nozzle credentials
+    type: simple_credentials
+    configurable: false
+    default:
+      identity: wavefront_nozzle
   - name: custom_tag_foundation
     type: string
     label: PCF foundation name
@@ -211,6 +213,15 @@ forms:
           label: Number of Nozzle App Instances
           default: 1
           configurable: true
+        - name: memory
+          type: string
+          default: 2G
+          label: Nozzle App Instances memory
+          description: "Format: must be an integer followed by either an M, for megabytes, or G, for gigabytes. (2G, 512M)" 
+          configurable: true
+          constraints:
+          - must_match_regex: '^[\d]+[GM]$'
+            error_message: 'Memory must be an integer followed by either an M, for megabytes, or G, for gigabytes. (2G, 512M)'
         - name: workers
           type: integer
           label: Number of Nozzle Workers

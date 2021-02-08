@@ -1,0 +1,13 @@
+---
+wavefront_url: https://.........wavefront.com/api
+wavefront_token: ........
+friendly_hostname: proxy-pcf
+cf_quota_name: runaway
+
+custom_tag_foundation: "........"
+
+advanced_config: "yes"
+advanced_config.advanced.instances: 2
+advanced_config.advanced.memory: 3G
+advanced_config.advanced.workers: 2
+advanced_config.advanced.queue_size: 10000
