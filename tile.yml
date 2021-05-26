@@ -92,6 +92,7 @@ packages:
       NOZZLE_WORKERS: (( .properties.advanced_config.advanced.workers.value ))
 
       WAVEFRONT_PROXY_PORT: 2878
+      WAVEFRONT_PROXY_HISTOGRAM_MINUTE_PORT: 40001
       WAVEFRONT_PREFIX: (( .properties.advanced_config.advanced.metrics_prefix.value ))
       WAVEFRONT_FOUNDATION: (( .properties.custom_tag_foundation.value ))
 
@@ -208,6 +209,12 @@ forms:
           optional: true
           configurable: true
           description: Comma separated list of glob patterns. Metrics with names matching the blacklist are dropped.
+        - name: metrics_to_histogram_filter
+          type: string_list
+          label: Metrics To Histograms List
+          optional: true
+          configurable: true
+          description: Comma separated list of glob patterns. Metrics with names matching will be sent as histogram.
         - name: instances
           type: integer
           label: Number of Nozzle App Instances
@@ -246,6 +253,11 @@ forms:
         - name: custom_wf_proxy_port
           type: integer
           label: Custom Proxy Port
+          optional: true
+          configurable: true
+        - name: custom_wf_proxy_his_min_port
+          type: integer
+          label: Custom Histogram To Minute Proxy Port
           optional: true
           configurable: true
         - name: legacy_mode
