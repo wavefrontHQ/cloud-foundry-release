@@ -103,7 +103,7 @@ echo
             curl -L "${url}" --output ${file}
             if [[ "${file}" == jsvc* ]]; then
                 [ -f "jsvc" ] && rm jsvc
-                tar xvf ${file}
+                unzip ${file}
             fi
         fi
     done
