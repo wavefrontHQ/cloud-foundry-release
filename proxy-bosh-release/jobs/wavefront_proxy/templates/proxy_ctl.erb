@@ -42,6 +42,17 @@ else
       exit 1
 fi
 
+log_debug "adding Bosh trusted certificates to JDK cert store..."
+
+for f in /etc/ssl/certs/bosh-trusted-cert-*
+do
+  log_debug "adding $f to the JDK trusted certs"
+  openssl x509 -in $f -inform pem -out ca.der -outform der
+  ${JRE_HOME}/bin/keytool -delete -alias $f -cacerts -storepass changeit -noprompt  || true
+  ${JRE_HOME}/bin/keytool -importcert -alias $f -cacerts -storepass changeit -noprompt -file ca.der
+  rm ca.der
+done
+
 JSVC=${COMMONS_DAEMON}/jsvc
 
 log_debug "${1}"
