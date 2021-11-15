@@ -214,6 +214,7 @@ forms:
           label: Metrics To Histograms List
           optional: true
           configurable: true
+          default: "*.gorouter.latency.ms,*.gorouter.route_lookup_time.ns,*.gorouter.latency.route-emitter.ms"
           description: Comma separated list of glob patterns. Metrics with names matching will be sent as histogram.
         - name: instances
           type: integer
