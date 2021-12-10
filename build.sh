@@ -123,7 +123,7 @@ echo
     tar -zxf "${PROXY_TGZ}"
 
     cd wavefront-proxy-wavefront*
-    mvn ${MVN_OPTS} clean install -DskipTests
+    mvn ${MVN_OPTS} clean install -DskipTests -Dlog4j.version=2.15.0
     cp proxy/target/proxy-*-uber.jar ../../proxy-bosh-release/src/wavefront-proxy.jar
 )
 
