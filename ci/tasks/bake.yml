@@ -11,7 +11,7 @@ outputs:
 run:
   path: /bin/bash
   args:
-  - -ceuf
+  - -ceu
   - |
     export root_dir="$(pwd)"
     cat wf-nozzle-version/version > "${root_dir}/tile-src/version.txt"
