@@ -1,2 +1,2 @@
 env_name: t2-tas212
-availability_zones: ["us-central1-c","us-central1-a","us-central1-b"
+availability_zones: ["us-central1-c","us-central1-a","us-central1-b"]
