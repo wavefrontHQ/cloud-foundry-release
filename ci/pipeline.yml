@@ -71,10 +71,10 @@ prepare-tas2to-tasks-with-secrets: &prepare-tas2to-tasks-with-secrets
   image: platform-automation-image
   file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
   input_mapping:
-    tasks: tas2to
+    tasks: wf-nozzle
     vars: terraform-vars
   output_mapping:
-    tasks: tas2to-tasks-with-secrets
+    tasks: wf-nozzle-tasks-with-secrets
   params:
     CONFIG_PATHS: config/ci/config/ config/ci/t2-tas212/env
     VARS_PATHS: vars config/ci/t2-tas212/vars/vars.yml
@@ -89,6 +89,8 @@ jobs:
       - get: config
         resource: wf-nozzle
       - get: terraform-vars
+        params:
+          unpack: true
       - in_parallel:
           - get: platform-automation-image
             resource: platform-automation
