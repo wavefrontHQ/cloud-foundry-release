@@ -20,6 +20,5 @@ run:
     mv tile /usr/local/bin/
     pushd ${root_dir}/tile-src/
       ./build.sh
-      ls product
-      cp product/wavefront-nozzle-*.pivotal ${root_dir}/baked-tile
     popd
+    cp ${root_dir}/tile-src/product/wavefront-nozzle-*.pivotal ${root_dir}/baked-tile
