@@ -52,7 +52,7 @@ resources:
     source:
       driver: gcs
       bucket: tas2to
-      key: versions/v1.0
+      key: versions/wf-nozzle
       json_key: ((service-account-json))
       initial_version: 0.0.6
 prepare-platform-automation-tasks-with-secrets: &prepare-platform-automation-tasks-with-secrets
