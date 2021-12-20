@@ -56,6 +56,12 @@ resources:
       key: versions/wf-nozzle
       json_key: ((service-account-json))
       initial_version: 0.0.6
+  - name: tas-env
+    type: pcf-pool
+    source:
+      api_token: ((toolsmiths-api-key))
+      hostname: environments.toolsmiths.cf-app.com
+      pool_name: "us_2_12"
 prepare-platform-automation-tasks-with-secrets: &prepare-platform-automation-tasks-with-secrets
   image: platform-automation-image
   file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
@@ -84,8 +90,12 @@ jobs:
     serial: true
     plan:
       - get: wf-nozzle
+        trigger: true
+        passed: [claim-tas-env]
       - get: wf-nozzle-version
       - get: tas2to-image
+      - get: tas-env
+        passed: [claim-tas-env]
       - get: config
         resource: wf-nozzle
       - get: terraform-vars
@@ -103,6 +113,10 @@ jobs:
             params:
               globs: [ "*tasks*.zip" ]
               unpack: true
+      - task: "show-claimed-tas-env"
+        file: concourse-tasks/toolsmiths/claim-pooled-env/task.yml
+        input_mapping:
+          pooled-env: tas-env
       - task: prepare-platform-automation-tasks-with-secrets
         <<: *prepare-platform-automation-tasks-with-secrets
       - task: prepare-tas2to-tasks-with-secrets
@@ -112,14 +126,21 @@ jobs:
         image: tas2to-image
         input_mapping:
           tile-src: wf-nozzle
-      - task: upload-and-stage-product
-        file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      - task: "update-smith-config-files"
+        file: config/ci/tasks/update-smith-config-files.yml
+        image: tas2to-image
+      - task: "stage-configure-apply"
+        file: platform-automation-tasks/tasks/stage-configure-apply.yml
         image: platform-automation-image
         input_mapping:
+          env: tas-env
           product: baked-tile
-          env: config
+          vars: tas-env
+          config: updated-config
         params:
-          ENV_FILE: ci/t2-tas212/env/env.yml
+          ENV_FILE: pcf.yml
+          CONFIG_FILE: ci/config/wavefront-nozzle.yml
+          VARS_FILES: vars/metadata
 #      - in_parallel:
 #          - get: platform-automation-image
 #            resource: platform-automation
@@ -190,3 +211,25 @@ jobs:
 #        image: tas2to-image
 #        params:
 #          PCF_FOUNDATION_NAME: pcr-proxy-tas2to-212
+
+  - name: claim-tas-env
+    plan:
+      - get: wf-nozzle
+        trigger: true
+      - put: tas-env
+        params:
+          action: claim
+        inputs: []
+  - name: "unclaim-tas-env"
+    plan:
+      - get: wf-nozzle
+        trigger: true
+        passed: [bake-and-install-wf-nozzle]
+      - get: tas-env
+        passed: ["claim-tas-env"]
+      - put: tas-env
+        params:
+          action: unclaim
+          env_file: tas-env/metadata
+        inputs:
+          - tas-env
