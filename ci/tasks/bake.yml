@@ -15,5 +15,8 @@ run:
   - |
     export root_dir=$(pwd)
     cat wf-nozzle-version/version > version.txt
+    curl -L https://github.com/cf-platform-eng/tile-generator/releases/download/v14.0.5/tile_linux-64bit -o tile
+    chmod +x tile
+    mv tile /usr/local/bin/
     ${root_dir}/tile-src/build.sh
 
