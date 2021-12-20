@@ -13,9 +13,9 @@ product-properties:
     selected_option: default
     value: Default
   .properties.custom_tag_foundation:
-    value: ((env_name))
+    value: ((name))
   .properties.friendly_hostname:
-    value: ((env_name))
+    value: ((name))
   .properties.org:
     value: wavefront-nozzle-org
   .properties.pcf_skip_ssl_validation:

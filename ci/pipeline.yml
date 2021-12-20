@@ -135,6 +135,14 @@ jobs:
       - task: "update-smith-config-files"
         file: config/ci/tasks/update-smith-config-files.yml
         image: tas2to-image
+      - task: "upload-product"
+        file: platform-automation-tasks/tasks/upload-product.yml
+        image: platform-automation-image
+        input_mapping:
+          product: baked-tile
+          env: tas-env
+        params:
+          ENV_FILE: pcf.yml
       - task: "stage-configure-apply"
         file: platform-automation-tasks/tasks/stage-configure-apply.yml
         image: platform-automation-image
