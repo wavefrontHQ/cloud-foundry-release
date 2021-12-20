@@ -24,13 +24,13 @@ resources:
     type: git
     source:
       uri: git@github.com:wavefrontHQ/cloud-foundry-release
-      branch: main
+      branch: create-pipeline
       private_key: ((git-key.private_key))
-#  - name: platform-automation
-#    type: pivnet
-#    source:
-#      product_slug: platform-automation
-#      api_token: ((pivnet-refresh-token))
+  - name: platform-automation
+    type: pivnet
+    source:
+      product_slug: platform-automation
+      api_token: ((pivnet-refresh-token))
 #  - name: denver-locks
 #    type: git
 #    source:
@@ -42,11 +42,12 @@ resources:
 #    source:
 #      uri: https://github.com/pivotal-cf/concourse-tasks
 #      branch: master
-#  - name: terraform-vars
-#    type: gcs-resource
-#    source:
-#      bucket: tas2to
-#      json_key: ((service-account-json))
+  - name: terraform-vars
+    type: gcs-resource
+    source:
+      bucket: tas2to
+      json_key: ((service-account-json))
+      versioned_file: "envs/t2-tas212/terraform-vars.zip"
   - name: wf-nozzle-version
     type: semver
     source:
@@ -85,11 +86,38 @@ jobs:
       - get: wf-nozzle
       - get: wf-nozzle-version
       - get: tas2to-image
+      - get: config
+        resource: wf-nozzle
+      - get: terraform-vars
+      - in_parallel:
+          - get: platform-automation-image
+            resource: platform-automation
+            params:
+              globs: [ "*image*.tgz" ]
+              unpack: true
+            trigger: true
+          - get: platform-automation-tasks
+            resource: platform-automation
+            params:
+              globs: [ "*tasks*.zip" ]
+              unpack: true
+      - task: prepare-platform-automation-tasks-with-secrets
+        <<: *prepare-platform-automation-tasks-with-secrets
+      - task: prepare-tas2to-tasks-with-secrets
+        <<: *prepare-tas2to-tasks-with-secrets
       - task: bake-tile
         file: wf-nozzle/ci/tasks/bake.yml
         image: tas2to-image
         input_mapping:
           tile-src: wf-nozzle
+      - task: upload-and-stage-product
+        file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+        image: platform-automation-image
+        input_mapping:
+          product: baked-tile
+          env: config
+        params:
+          ENV_FILE: ci/t2-tas212/env/env.yml
 #      - in_parallel:
 #          - get: platform-automation-image
 #            resource: platform-automation
