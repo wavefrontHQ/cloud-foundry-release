@@ -15,5 +15,5 @@ run:
   - |
     export root_dir=$(pwd)
     cat wf-nozzle-version/version > version.txt
-    ${root_dir}/build.sh
+    ${root_dir}/wf-nozzle/build.sh
 
