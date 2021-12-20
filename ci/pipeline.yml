@@ -1,0 +1,162 @@
+---
+resource_types:
+  - name: pcf-pool
+    type: docker-image
+    source:
+      repository: cftoolsmiths/toolsmiths-envs-resource
+  - name: gcs-resource
+    type: docker-image
+    source:
+      repository: observabilityresearch/gcs-resource
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
+resources:
+  - name: tas2to-image
+    type: docker-image
+    source:
+      repository: gcr.io/cf-denver/tas2to-ci
+      username: _json_key
+      password: ((service-account-json))
+  - name: wf-nozzle
+    type: git
+    source:
+      uri: git@github.com:wavefrontHQ/cloud-foundry-release
+      branch: main
+      private_key: ((git-key.private_key))
+#  - name: platform-automation
+#    type: pivnet
+#    source:
+#      product_slug: platform-automation
+#      api_token: ((pivnet-refresh-token))
+#  - name: denver-locks
+#    type: git
+#    source:
+#      uri: git@github.com:pivotal-cf/denver-locks
+#      branch: master
+#      private_key: ((git-key.private_key))
+#  - name: concourse-tasks
+#    type: git
+#    source:
+#      uri: https://github.com/pivotal-cf/concourse-tasks
+#      branch: master
+#  - name: terraform-vars
+#    type: gcs-resource
+#    source:
+#      bucket: tas2to
+#      json_key: ((service-account-json))
+  - name: wf-nozzle-version
+    type: semver
+    source:
+      driver: gcs
+      bucket: tas2to
+      key: versions/v1.0
+      json_key: ((service-account-json))
+      initial_version: 0.0.6
+prepare-platform-automation-tasks-with-secrets: &prepare-platform-automation-tasks-with-secrets
+  image: platform-automation-image
+  file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
+  input_mapping:
+    tasks: platform-automation-tasks
+    vars: terraform-vars
+  output_mapping:
+    tasks: platform-automation-tasks
+  params:
+    CONFIG_PATHS: config/ci/config/ config/ci/t2-tas212/env
+    VARS_PATHS: vars config/ci/t2-tas212/vars/vars.yml
+prepare-tas2to-tasks-with-secrets: &prepare-tas2to-tasks-with-secrets
+  image: platform-automation-image
+  file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
+  input_mapping:
+    tasks: tas2to
+    vars: terraform-vars
+  output_mapping:
+    tasks: tas2to-tasks-with-secrets
+  params:
+    CONFIG_PATHS: config/ci/config/ config/ci/t2-tas212/env
+    VARS_PATHS: vars config/ci/t2-tas212/vars/vars.yml
+    TASK_PATH: tasks/ci/tasks
+jobs:
+  - name: bake-and-install-wf-nozzle
+    serial: true
+    plan:
+      - get: wf-nozzle
+      - get: wf-nozzle-version
+      - get: tas2to-image
+      - task: bake-tile
+        file: wf-nozzle/ci/tasks/bake.yml
+        image: tas2to-image
+        input_mapping:
+          tile-src: wf-nozzle
+#      - in_parallel:
+#          - get: platform-automation-image
+#            resource: platform-automation
+#            params:
+#              globs: [ "*image*.tgz" ]
+#              unpack: true
+#            trigger: true
+#          - get: platform-automation-tasks
+#            resource: platform-automation
+#            params:
+#              globs: [ "*tasks*.zip" ]
+#              unpack: true
+#          - get: wf-nozzle
+#            trigger: true
+#          - get: tas2to-image
+#          - get: denver-locks
+#          - get: concourse-tasks
+#          - get: terraform-vars
+#            params:
+#              unpack: true
+#          - get: wf-nozzle-version
+#            params:
+#              pre: build
+#      - put: wf-nozzle-version
+#        params:
+#          file: wf-nozzle-version/version
+#      - task: prepare-platform-automation-tasks-with-secrets
+#        <<: *prepare-platform-automation-tasks-with-secrets
+#      - task: prepare-tas2to-tasks-with-secrets
+#        <<: *prepare-tas2to-tasks-with-secrets
+#      - task: bake-tile
+#        file: wf-nozzle/ci/tasks/bake.yml
+#        image: tas2to-image
+#        input_mapping:
+#          tile-src: wf-nozzle
+#      - task: upload-and-stage-product
+#        file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+#        image: platform-automation-image
+#        input_mapping:
+#          product: baked-tile
+#          env: wf-nozzle
+#        params:
+#          ENV_FILE: ci/t2-tas212/env/env.yml
+#      - task: configure-product
+#        file: platform-automation-tasks/tasks/configure-product.yml
+#        image: platform-automation-image
+#        input_mapping:
+#          env: wf-nozzle
+#          vars: terraform-vars
+#          config: wf-nozzle
+#        params:
+#          ENV_FILE: ci/t2-tas212/env/env.yml
+#          CONFIG_FILE: ci/config/tas2to.yml
+#          VARS_FILES: |
+#            vars/terraform-outputs-opsmanager.yml
+#            vars/terraform-outputs-tas.yml
+#            vars/terraform-outputs-tkgi.yml
+#      - task: apply-tas2to-changes
+#        file: tas2to-tasks-with-secrets/ci/tasks/selective-apply-changes.yml
+#        image: platform-automation-image
+#        input_mapping:
+#          env: wf-nozzle
+#        params:
+#          ENV_FILE: ci/t2-tas212/env/env.yml
+#          PRODUCTS: tas-2-to
+#      - task: test-installation
+#        file: tas2to-tasks-with-secrets/ci/tasks/test.yml
+#        image: tas2to-image
+#        params:
+#          PCF_FOUNDATION_NAME: pcr-proxy-tas2to-212

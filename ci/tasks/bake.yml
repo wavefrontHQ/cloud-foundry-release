@@ -1,0 +1,19 @@
+---
+platform: linux
+
+inputs:
+- name: tile-src
+- name: tas2to-version
+
+outputs:
+- name: baked-tile
+
+run:
+  path: /bin/bash
+  args:
+  - -ceuf
+  - |
+    export root_dir=$(pwd)
+    version=$(cat tas2to-version/version)
+    ${root_dir}/build.sh --final
+
