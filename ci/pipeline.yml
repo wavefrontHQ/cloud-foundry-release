@@ -14,6 +14,11 @@ resource_types:
       repository: pivotalcf/pivnet-resource
       tag: latest-final
 resources:
+  - name: concourse-tasks
+    type: git
+    source:
+      uri: https://github.com/pivotal-cf/concourse-tasks
+      branch: master
   - name: tas2to-image
     type: docker-image
     source:
@@ -98,6 +103,7 @@ jobs:
         passed: [claim-tas-env]
       - get: config
         resource: wf-nozzle
+      - get: concourse-tasks
       - get: terraform-vars
         params:
           unpack: true
@@ -226,7 +232,7 @@ jobs:
         trigger: true
         passed: [bake-and-install-wf-nozzle]
       - get: tas-env
-        passed: ["claim-tas-env"]
+        passed: [bake-and-install-wf-nozzle]
       - put: tas-env
         params:
           action: unclaim
