@@ -57,7 +57,7 @@ run:
 
       echo "Checking for collected metric: wavefront-firehose-nozzle.app.total-metrics-sent.count and validating data..."
       data=$(cat pcf-nozzle-metric.json | jq --raw-output .timeseries[0].data[0][1])
-      if [[ $data == 0 ]]; then
+      if (( $data > 0 )); then
         echo "Metric was not collected!"
         exit 1
       fi
@@ -103,7 +103,7 @@ run:
 
       echo "Checking for collected metric: pcf.cc.requests.completed.counter and validating data..."
       data=$(cat pcf-server-metric.json | jq --raw-output .timeseries[0].data[0][1])
-      if [[ $data == 0 ]]; then
+      if (( $data > 0 )); then
         echo "Metric was not collected!"
         exit 1
       fi
@@ -112,4 +112,3 @@ run:
 
       echo ""
       echo "ALL TESTS PASSED!"
-      exit 1

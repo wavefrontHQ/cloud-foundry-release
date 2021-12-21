@@ -72,11 +72,10 @@ jobs:
     serial: true
     plan:
       - get: wf-nozzle
-        trigger: true
-#        passed: [claim-tas-env]
       - get: wf-nozzle-version
       - get: tas2to-image
       - get: tas-env
+        trigger: true
         passed: [claim-tas-env]
       - get: config
         resource: wf-nozzle
@@ -129,11 +128,6 @@ jobs:
           ENV_FILE: pcf.yml
           CONFIG_FILE: ci/config/wavefront-nozzle.yml
           VARS_FILES: vars/metadata
-      - task: test-installation
-        file: tas2to-tasks-with-secrets/ci/tasks/test.yml
-        image: tas2to-image
-        params:
-          PCF_FOUNDATION_NAME: pcr-proxy-tas2to-212
 #      - in_parallel:
 #          - get: platform-automation-image
 #            resource: platform-automation
@@ -204,22 +198,28 @@ jobs:
 #        image: tas2to-image
 #        params:
 #          PCF_FOUNDATION_NAME: pcr-proxy-tas2to-212
+  - name: test-foundation
+    plan:
+      - get: wf-nozzle
+      - get: tas2to-image
+      - get: tas-env
+        trigger: true
+        passed: [bake-and-install-wf-nozzle]
+      - task: test-installation
+        file: wf-nozzle/ci/tasks/test.yml
+        image: tas2to-image
+        params:
+          PCF_FOUNDATION_NAME: somethingthatdoesntexist
 
   - name: claim-tas-env
     plan:
-      - get: wf-nozzle
-        trigger: true
       - put: tas-env
         params:
           action: claim
         inputs: []
   - name: "unclaim-tas-env"
     plan:
-      - get: wf-nozzle
-        trigger: true
-        passed: [bake-and-install-wf-nozzle]
       - get: tas-env
-        passed: [bake-and-install-wf-nozzle]
       - put: tas-env
         params:
           action: unclaim
