@@ -3,6 +3,7 @@ platform: linux
 
 params:
   WAVEFRONT_API_TOKEN: ((wavefront-api-token))
+  WAVEFRONT_URL: vmware.wavefront.com
   PCF_FOUNDATION_NAME:
 
 run:
@@ -10,8 +11,6 @@ run:
   args:
     - -ceu
     - |
-
-      export WAVEFRONT_URL='vmware.wavefront.com'
 
       echo "setting start and stop time (about 2 minutes)..."
       export METRIC_START_TIME_EPOCH=$(echo $((`date +%s`*1000+`date +%-N`/1000000)))
@@ -26,6 +25,8 @@ run:
       curl_value=$(curl -X GET -w '\\n%{response_code}' --header 'Accept: application/json' --header "Authorization: Bearer ${WAVEFRONT_API_TOKEN}" "${url}")
       response_code=$(echo $curl_value | sed 's/.*\\\\n//')
       response=$(echo $curl_value | sed 's/\\\\n.*//')
+
+      echo $curl_value
 
       echo $response_code
 
@@ -67,6 +68,9 @@ run:
       url="https://${WAVEFRONT_URL}/api/v2/chart/api?q=rate(ts(%22pcf.cc.requests.completed.counter%22%2C%20foundation%3D${PCF_FOUNDATION_NAME}))&queryType=HYBRID&s=${METRIC_START_TIME_EPOCH}&e=${METRIC_END_TIME_EPOCH}&g=d&p=1&view=METRIC&sorted=false&cached=true&useRawQK=false"
 
       curl_value=$(curl -X GET -w '\\n%{response_code}' --header 'Accept: application/json' --header "Authorization: Bearer ${WAVEFRONT_API_TOKEN}" "${url}")
+
+      echo $curl_value
+
       response_code=$(echo $curl_value | sed 's/.*\\\\n//')
       response=$(echo $curl_value | sed 's/\\\\n.*//')
 
