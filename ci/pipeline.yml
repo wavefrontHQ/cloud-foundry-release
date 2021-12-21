@@ -47,12 +47,12 @@ resources:
 #    source:
 #      uri: https://github.com/pivotal-cf/concourse-tasks
 #      branch: master
-  - name: terraform-vars
-    type: gcs-resource
-    source:
-      bucket: tas2to
-      json_key: ((service-account-json))
-      versioned_file: "envs/t2-tas212/terraform-vars.zip"
+#  - name: terraform-vars
+#    type: gcs-resource
+#    source:
+#      bucket: tas2to
+#      json_key: ((service-account-json))
+#      versioned_file: "envs/t2-tas212/terraform-vars.zip"
   - name: wf-nozzle-version
     type: semver
     source:
@@ -67,36 +67,13 @@ resources:
       api_token: ((toolsmiths-api-key))
       hostname: environments.toolsmiths.cf-app.com
       pool_name: "us_2_12"
-prepare-platform-automation-tasks-with-secrets: &prepare-platform-automation-tasks-with-secrets
-  image: platform-automation-image
-  file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
-  input_mapping:
-    tasks: platform-automation-tasks
-    vars: terraform-vars
-  output_mapping:
-    tasks: platform-automation-tasks
-  params:
-    CONFIG_PATHS: config/ci/config/ config/ci/t2-tas212/env
-    VARS_PATHS: vars config/ci/t2-tas212/vars/vars.yml
-prepare-tas2to-tasks-with-secrets: &prepare-tas2to-tasks-with-secrets
-  image: platform-automation-image
-  file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
-  input_mapping:
-    tasks: wf-nozzle
-    vars: terraform-vars
-  output_mapping:
-    tasks: wf-nozzle-tasks-with-secrets
-  params:
-    CONFIG_PATHS: config/ci/config/ config/ci/t2-tas212/env
-    VARS_PATHS: vars config/ci/t2-tas212/vars/vars.yml
-    TASK_PATH: tasks/ci/tasks
 jobs:
   - name: bake-and-install-wf-nozzle
     serial: true
     plan:
       - get: wf-nozzle
         trigger: true
-        passed: [claim-tas-env]
+#        passed: [claim-tas-env]
       - get: wf-nozzle-version
       - get: tas2to-image
       - get: tas-env
@@ -104,9 +81,6 @@ jobs:
       - get: config
         resource: wf-nozzle
       - get: concourse-tasks
-      - get: terraform-vars
-        params:
-          unpack: true
       - in_parallel:
           - get: platform-automation-image
             resource: platform-automation
@@ -155,6 +129,11 @@ jobs:
           ENV_FILE: pcf.yml
           CONFIG_FILE: ci/config/wavefront-nozzle.yml
           VARS_FILES: vars/metadata
+      - task: test-installation
+        file: tas2to-tasks-with-secrets/ci/tasks/test.yml
+        image: tas2to-image
+        params:
+          PCF_FOUNDATION_NAME: pcr-proxy-tas2to-212
 #      - in_parallel:
 #          - get: platform-automation-image
 #            resource: platform-automation
