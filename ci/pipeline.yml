@@ -88,7 +88,7 @@ prepare-tas2to-tasks-with-secrets: &prepare-tas2to-tasks-with-secrets
   image: platform-automation-image
   file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
   input_mapping:
-    tasks: tas2to
+    tasks: wf-nozzle
     vars: terraform-vars
   output_mapping:
     tasks: tas2to-tasks-with-secrets
@@ -148,7 +148,6 @@ jobs:
           ENV_FILE: pcf.yml
           CONFIG_FILE: ci/config/wavefront-nozzle.yml
           VARS_FILES: vars/metadata
-      - put: wf-nozzle-version
   - name: test-smith-installation
     plan:
       - get: wf-nozzle
@@ -188,17 +187,18 @@ jobs:
           tile-src: wf-nozzle
         params:
           KILN_OPTS: --final
-      - put: built-tile
+      - put: final-tile
         params:
           file: baked-tile/*.pivotal
-      - put: wf-nozzle-version
   - name: install-final-wf-nozzle-to-long-lived
     serial: true
     plan:
       - get: wf-nozzle
-      - get: wf-nozzle-version
+      - get: final-tile
+        trigger: true
       - get: tas2to-image
       - get: terraform-vars
+        unpack: true
       - get: config
         resource: wf-nozzle
       - in_parallel:
@@ -220,8 +220,8 @@ jobs:
         file: platform-automation-tasks/tasks/upload-product.yml
         image: platform-automation-image
         input_mapping:
-          product: baked-tile
-          env: tas-env
+          product: final-tile
+          env: terraform-vars
         params:
           ENV_FILE: pcf.yml
       - task: "stage-configure-apply"
@@ -236,7 +236,6 @@ jobs:
           ENV_FILE: pcf.yml
           CONFIG_FILE: ci/config/wavefront-nozzle.yml
           VARS_FILES: vars/metadata
-      - put: wf-nozzle-version
 
   - name: claim-tas-env
     plan:
