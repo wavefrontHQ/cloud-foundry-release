@@ -2,7 +2,7 @@
 platform: linux
 
 inputs:
-  - tas-env
+  - name: tas-env
 
 params:
   WAVEFRONT_API_TOKEN: ((wavefront-api-token))
