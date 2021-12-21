@@ -14,7 +14,7 @@ run:
     - -ceu
     - |
 
-      PCF_FOUNDATION_NAME=$(cat tas-env/metadata.yml | jq .name)
+      PCF_FOUNDATION_NAME=$(cat tas-env/metadata | jq -r .name)
       echo "setting start and stop time (about 2 minutes)..."
       export METRIC_START_TIME_EPOCH=$(echo $((`date +%s`*1000+`date +%-N`/1000000)))
 
