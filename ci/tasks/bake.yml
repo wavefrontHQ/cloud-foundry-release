@@ -8,6 +8,9 @@ inputs:
 outputs:
 - name: baked-tile
 
+params:
+  KILN_OPTS:
+
 run:
   path: /bin/bash
   args:
@@ -19,6 +22,6 @@ run:
     chmod +x tile
     mv tile /usr/local/bin/
     pushd "${root_dir}/tile-src/"
-      ./build.sh
+      ./build.sh ${KILN_OPTS}
     popd
     cp "${root_dir}"/tile-src/product/wavefront-nozzle-*.pivotal "${root_dir}/baked-tile"
