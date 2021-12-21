@@ -60,7 +60,7 @@ resources:
       bucket: tas2to
       key: versions/wf-nozzle
       json_key: ((service-account-json))
-      initial_version: 0.0.6
+      initial_version: 3.0.5
   - name: tas-env
     type: pcf-pool
     source:
@@ -92,14 +92,6 @@ jobs:
             params:
               globs: [ "*tasks*.zip" ]
               unpack: true
-      - task: "show-claimed-tas-env"
-        file: concourse-tasks/toolsmiths/claim-pooled-env/task.yml
-        input_mapping:
-          pooled-env: tas-env
-      - task: prepare-platform-automation-tasks-with-secrets
-        <<: *prepare-platform-automation-tasks-with-secrets
-      - task: prepare-tas2to-tasks-with-secrets
-        <<: *prepare-tas2to-tasks-with-secrets
       - task: bake-tile
         file: wf-nozzle/ci/tasks/bake.yml
         image: tas2to-image
@@ -128,76 +120,7 @@ jobs:
           ENV_FILE: pcf.yml
           CONFIG_FILE: ci/config/wavefront-nozzle.yml
           VARS_FILES: vars/metadata
-#      - in_parallel:
-#          - get: platform-automation-image
-#            resource: platform-automation
-#            params:
-#              globs: [ "*image*.tgz" ]
-#              unpack: true
-#            trigger: true
-#          - get: platform-automation-tasks
-#            resource: platform-automation
-#            params:
-#              globs: [ "*tasks*.zip" ]
-#              unpack: true
-#          - get: wf-nozzle
-#            trigger: true
-#          - get: tas2to-image
-#          - get: denver-locks
-#          - get: concourse-tasks
-#          - get: terraform-vars
-#            params:
-#              unpack: true
-#          - get: wf-nozzle-version
-#            params:
-#              pre: build
-#      - put: wf-nozzle-version
-#        params:
-#          file: wf-nozzle-version/version
-#      - task: prepare-platform-automation-tasks-with-secrets
-#        <<: *prepare-platform-automation-tasks-with-secrets
-#      - task: prepare-tas2to-tasks-with-secrets
-#        <<: *prepare-tas2to-tasks-with-secrets
-#      - task: bake-tile
-#        file: wf-nozzle/ci/tasks/bake.yml
-#        image: tas2to-image
-#        input_mapping:
-#          tile-src: wf-nozzle
-#      - task: upload-and-stage-product
-#        file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-#        image: platform-automation-image
-#        input_mapping:
-#          product: baked-tile
-#          env: wf-nozzle
-#        params:
-#          ENV_FILE: ci/t2-tas212/env/env.yml
-#      - task: configure-product
-#        file: platform-automation-tasks/tasks/configure-product.yml
-#        image: platform-automation-image
-#        input_mapping:
-#          env: wf-nozzle
-#          vars: terraform-vars
-#          config: wf-nozzle
-#        params:
-#          ENV_FILE: ci/t2-tas212/env/env.yml
-#          CONFIG_FILE: ci/config/tas2to.yml
-#          VARS_FILES: |
-#            vars/terraform-outputs-opsmanager.yml
-#            vars/terraform-outputs-tas.yml
-#            vars/terraform-outputs-tkgi.yml
-#      - task: apply-tas2to-changes
-#        file: tas2to-tasks-with-secrets/ci/tasks/selective-apply-changes.yml
-#        image: platform-automation-image
-#        input_mapping:
-#          env: wf-nozzle
-#        params:
-#          ENV_FILE: ci/t2-tas212/env/env.yml
-#          PRODUCTS: tas-2-to
-#      - task: test-installation
-#        file: tas2to-tasks-with-secrets/ci/tasks/test.yml
-#        image: tas2to-image
-#        params:
-#          PCF_FOUNDATION_NAME: pcr-proxy-tas2to-212
+      - put: wf-nozzle-version
   - name: test-foundation
     plan:
       - get: wf-nozzle
@@ -215,7 +138,7 @@ jobs:
         params:
           action: claim
         inputs: []
-  - name: claim-tas-env
+  - name: renew-tas-env
     plan:
       - get: tas-env
       - put: tas-env
