@@ -215,6 +215,14 @@ jobs:
         params:
           action: claim
         inputs: []
+  - name: claim-tas-env
+    plan:
+      - get: tas-env
+      - put: tas-env
+        params:
+          action: renew
+          env_file: tas-env/metadata
+        inputs: [tas-env]
   - name: "unclaim-tas-env"
     plan:
       - get: tas-env
