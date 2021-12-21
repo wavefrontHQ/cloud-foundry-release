@@ -1,10 +1,12 @@
 ---
 platform: linux
 
+inputs:
+  - tas-env
+
 params:
   WAVEFRONT_API_TOKEN: ((wavefront-api-token))
   WAVEFRONT_URL: vmware.wavefront.com
-  PCF_FOUNDATION_NAME:
 
 run:
   path: /bin/bash
@@ -12,6 +14,7 @@ run:
     - -ceu
     - |
 
+      PCF_FOUNDATION_NAME=$(cat tas-env/metadata.yml | jq .name)
       echo "setting start and stop time (about 2 minutes)..."
       export METRIC_START_TIME_EPOCH=$(echo $((`date +%s`*1000+`date +%-N`/1000000)))
 

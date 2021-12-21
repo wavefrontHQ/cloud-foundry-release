@@ -208,8 +208,6 @@ jobs:
       - task: test-installation
         file: wf-nozzle/ci/tasks/test.yml
         image: tas2to-image
-        params:
-          PCF_FOUNDATION_NAME: somethingthatdoesntexist
 
   - name: claim-tas-env
     plan:
