@@ -108,3 +108,4 @@ run:
 
       echo ""
       echo "ALL TESTS PASSED!"
+      exit 1
