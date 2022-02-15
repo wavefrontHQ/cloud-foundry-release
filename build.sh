@@ -65,15 +65,6 @@ requiredver=$(get_tile_latest_release)
         exit 1
  fi
 
-# Checking tile version format
-re='^[0-9]+.[0-9]+.[0-9]+$'
-if [[ ${VERSION} =~ $re ]]; then
-    TS=$(date +%s)
-    [ "${FINAL}" == "NO" ] && VERSION=${VERSION}-dev.${TS}
-else
-    echo "Incorrect version format, use X.X.X"
-    exit 1
-fi
 echo "Using version: '${VERSION}'"
 
 [ -d "tmp" ] && rm -rf tmp/* || mkdir -p tmp
