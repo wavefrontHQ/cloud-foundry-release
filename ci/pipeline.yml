@@ -29,7 +29,7 @@ resources:
     type: git
     source:
       uri: git@github.com:wavefrontHQ/cloud-foundry-release
-      branch: create-pipeline
+      branch: main
       private_key: ((git-key.private_key))
   - name: platform-automation
     type: pivnet
@@ -47,18 +47,18 @@ resources:
 #    source:
 #      uri: https://github.com/pivotal-cf/concourse-tasks
 #      branch: master
-  - name: terraform-vars
-    type: gcs-resource
-    source:
-      bucket: tas2to
-      json_key: ((service-account-json))
-      versioned_file: "envs/t2-tas212/terraform-vars.zip"
-  - name: final-tile
-    type: gcs-resource
-    source:
-      bucket: tas2to
-      json_key: ((service-account-json))
-      regexp: built-tiles/wavefront-nozzle-(.*).pivotal
+#  - name: terraform-vars
+#    type: gcs-resource
+#    source:
+#      bucket: tas2to
+#      json_key: ((service-account-json))
+#      versioned_file: "envs/t2-tas212/terraform-vars.zip"
+#  - name: final-tile
+#    type: gcs-resource
+#    source:
+#      bucket: tas2to
+#      json_key: ((service-account-json))
+#      regexp: built-tiles/wavefront-nozzle-(.*).pivotal
   - name: wf-nozzle-version
     type: semver
     source:
@@ -98,14 +98,16 @@ prepare-tas2to-tasks-with-secrets: &prepare-tas2to-tasks-with-secrets
     TASK_PATH: tasks/ci/tasks
 jobs:
   - name: bake-and-install-wf-nozzle
-    serial: true
+    serial_groups: [all]
     plan:
       - get: wf-nozzle
-      - get: wf-nozzle-version
+      - put: wf-nozzle-version
+        params: {pre: build}
       - get: tas2to-image
       - get: tas-env
         trigger: true
         passed: [claim-tas-env]
+        version: every
       - get: config
         resource: wf-nozzle
       - get: concourse-tasks
@@ -155,105 +157,26 @@ jobs:
       - get: tas-env
         trigger: true
         passed: [bake-and-install-wf-nozzle]
+        version: every
       - task: test-installation
         file: wf-nozzle/ci/tasks/test.yml
         image: tas2to-image
-  - name: bake-final-wf-nozzle
-    serial: true
-    plan:
-      - get: wf-nozzle
-        passed: [test-smith-installation]
-      - get: wf-nozzle-version
-      - get: tas2to-image
-      - get: terraform-vars
-      - get: config
-        resource: wf-nozzle
-      - get: concourse-tasks
-      - in_parallel:
-          - get: platform-automation-image
-            resource: platform-automation
-            params:
-              globs: [ "*image*.tgz" ]
-              unpack: true
-          - get: platform-automation-tasks
-            resource: platform-automation
-            params:
-              globs: [ "*tasks*.zip" ]
-              unpack: true
-      - task: bake-tile
-        file: wf-nozzle/ci/tasks/bake.yml
-        image: tas2to-image
-        input_mapping:
-          tile-src: wf-nozzle
-        params:
-          KILN_OPTS: --final
-      - put: final-tile
-        params:
-          file: baked-tile/*.pivotal
-  - name: install-final-wf-nozzle-to-long-lived
-    serial: true
-    plan:
-      - get: wf-nozzle
-      - get: final-tile
-        trigger: true
-      - get: tas2to-image
-      - get: terraform-vars
-        unpack: true
-      - get: config
-        resource: wf-nozzle
-      - in_parallel:
-          - get: platform-automation-image
-            resource: platform-automation
-            params:
-              globs: [ "*image*.tgz" ]
-              unpack: true
-          - get: platform-automation-tasks
-            resource: platform-automation
-            params:
-              globs: [ "*tasks*.zip" ]
-              unpack: true
-      - task: prepare-platform-automation-tasks-with-secrets
-        <<: *prepare-platform-automation-tasks-with-secrets
-      - task: prepare-tas2to-tasks-with-secrets
-        <<: *prepare-tas2to-tasks-with-secrets
-      - task: "upload-product"
-        file: platform-automation-tasks/tasks/upload-product.yml
-        image: platform-automation-image
-        input_mapping:
-          product: final-tile
-          env: terraform-vars
-        params:
-          ENV_FILE: pcf.yml
-      - task: "stage-configure-apply"
-        file: platform-automation-tasks/tasks/stage-configure-apply.yml
-        image: platform-automation-image
-        input_mapping:
-          env: tas-env
-          product: baked-tile
-          vars: tas-env
-          config: updated-config
-        params:
-          ENV_FILE: pcf.yml
-          CONFIG_FILE: ci/config/wavefront-nozzle.yml
-          VARS_FILES: vars/metadata
 
   - name: claim-tas-env
+    serial_groups: [all]
     plan:
+      - get: wf-nozzle
+        trigger: true
       - put: tas-env
         params:
           action: claim
         inputs: []
-  - name: renew-tas-env
-    plan:
-      - get: tas-env
-      - put: tas-env
-        params:
-          action: renew
-          env_file: tas-env/metadata
-        inputs: [tas-env]
   - name: "unclaim-tas-env"
     plan:
       - get: tas-env
+        trigger: true
+        passed: [test-smith-installation]
+        version: every
       - put: tas-env
         params:
           action: unclaim
