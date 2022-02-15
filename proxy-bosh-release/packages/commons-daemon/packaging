@@ -11,4 +11,5 @@ else
   exit 1
 fi
 cp -r ${commons_archive} ${BOSH_INSTALL_TARGET}
-cp -r ${jsvc_archive} ${BOSH_INSTALL_TARGET}
+unzip ${jsvc_archive}
+cp -r jsvc ${BOSH_INSTALL_TARGET}

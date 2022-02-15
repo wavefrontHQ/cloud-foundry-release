@@ -101,10 +101,6 @@ echo
         if [ ! -f "${file}" ]; then
             echo "Downloading File '${file}' => ${url}"
             curl -L "${url}" --output ${file}
-            if [[ "${file}" == jsvc* ]]; then
-                [ -f "jsvc" ] && rm jsvc
-                unzip ${file}
-            fi
         fi
     done
 )
