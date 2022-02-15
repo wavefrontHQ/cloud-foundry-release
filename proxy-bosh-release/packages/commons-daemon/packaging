@@ -1,13 +1,14 @@
 # abort script on any command that exit with a non zero value
 set -e
 
-archive=commons-daemon-1.2.3-bin.tar.gz
+commons_archive=commons-daemon-1.2.3-bin.tar.gz
+jsvc_archive=jsvc-1.2.3.zip
 
-if [[ -f $archive ]] ; then
-  echo "Archive found"
+if [[ -f ${commons_archive} ]] ; then
+  echo "Commons Daemon Archive found"
 else
-  echo "Archive not found"
+  echo "Commons Daemon Archive not found"
   exit 1
 fi
-cp -r $archive ${BOSH_INSTALL_TARGET}
-cp -r jsvc ${BOSH_INSTALL_TARGET}
+cp -r ${commons_archive} ${BOSH_INSTALL_TARGET}
+cp -r ${jsvc_archive} ${BOSH_INSTALL_TARGET}

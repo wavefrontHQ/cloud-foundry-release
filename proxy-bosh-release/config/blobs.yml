@@ -1,9 +1,9 @@
 commons-daemon-1.2.3-bin.tar.gz:
   size: 174682
   sha: be7848a5c64fddb184e8a03e2e6e7b4075e70425
+jsvc-1.2.3.zip:
+  size: 72543
+  sha: sha256:7a94a2df023976638b6469e439f0141988127b0c49a3b9692d54ff798315e9a8
 openjdk-11+28_linux-x64_bin.tar.gz:
   size: 187611826
   sha: 3784cfc4670f0d4c5482604c7c513beb1a92b005f569df9bf100e8bef6610f2e
-jsvc:
-  size: 48416
-  sha: 5d0fe2c48893477e53140dda142f834813a682ba
