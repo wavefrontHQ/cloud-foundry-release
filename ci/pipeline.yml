@@ -36,6 +36,12 @@ resources:
     source:
       product_slug: platform-automation
       api_token: ((pivnet-refresh-token))
+   - name: nozzle-tile
+     type: gcs-resource
+     source:
+       bucket: wf-nozzle
+       json_key: ((service-account-json))
+       regexp: dev-tiles/tas2to-(.*).pivotal
 #  - name: denver-locks
 #    type: git
 #    source:
@@ -150,6 +156,9 @@ jobs:
           ENV_FILE: pcf.yml
           CONFIG_FILE: ci/config/wavefront-nozzle.yml
           VARS_FILES: vars/metadata
+      - put: nozzle-tile
+        params:
+          file: baked-tile/*.pivotal
   - name: test-smith-installation
     plan:
       - get: wf-nozzle
