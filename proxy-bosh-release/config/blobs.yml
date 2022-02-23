@@ -1,9 +1,9 @@
+OpenJDK11U-jdk_x64_linux_hotspot_11.0.14.1_1.tar.gz:
+  size: 690
+  sha: sha256:589de5dc522e7c2abeec985f4fcd1ee71c6c6ef1ace38bb482571873471e8287
 commons-daemon-1.2.3-bin.tar.gz:
   size: 174682
   sha: be7848a5c64fddb184e8a03e2e6e7b4075e70425
-openjdk-11+28_linux-x64_bin.tar.gz:
-  size: 187611826
-  sha: 3784cfc4670f0d4c5482604c7c513beb1a92b005f569df9bf100e8bef6610f2e
 jsvc:
   size: 48416
   sha: 5d0fe2c48893477e53140dda142f834813a682ba

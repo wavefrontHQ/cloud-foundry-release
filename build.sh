@@ -3,7 +3,7 @@
 
 read -r -d '' BLOBS_FILES <<- EOM
 https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon-1.2.3-bin.tar.gz
-https://wavefront-cdn.s3-us-west-2.amazonaws.com/pcf/bosh-artifacts/openjdk-11_28_linux-x64_bin.tar.gz
+https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.14.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.14.1_1.tar.gz
 https://wavefront-cdn.s3-us-west-2.amazonaws.com/pcf/bosh-artifacts/jsvc-1.2.3.zip
 EOM
 
@@ -86,7 +86,7 @@ echo
     for url in ${BLOBS_FILES}; do
         file=$(echo "${url##*/}")
         if [[ "${file}" == openjdk* ]]; then
-            file="openjdk-11+28_linux-x64_bin.tar.gz"
+            file="OpenJDK11U-jdk_x64_linux_hotspot_11.0.14.1_1.tar.gz"
         fi
         [ "${DOWNLOAD}" == "YES" ] && rm ${file}
         if [ ! -f "${file}" ]; then
