@@ -29,42 +29,13 @@ resources:
     type: git
     source:
       uri: git@github.com:wavefrontHQ/cloud-foundry-release
-      branch: main
+      branch: ((branch))
       private_key: ((git-key.private_key))
   - name: platform-automation
     type: pivnet
     source:
       product_slug: platform-automation
       api_token: ((pivnet-refresh-token))
-  - name: nozzle-tile
-    type: gcs-resource
-    source:
-      bucket: tas2to
-      json_key: ((service-account-json))
-      regexp: dev-tiles/legacy-nozzle/wavefront-nozzle-(.*).pivotal
-#  - name: denver-locks
-#    type: git
-#    source:
-#      uri: git@github.com:pivotal-cf/denver-locks
-#      branch: master
-#      private_key: ((git-key.private_key))
-#  - name: concourse-tasks
-#    type: git
-#    source:
-#      uri: https://github.com/pivotal-cf/concourse-tasks
-#      branch: master
-#  - name: terraform-vars
-#    type: gcs-resource
-#    source:
-#      bucket: tas2to
-#      json_key: ((service-account-json))
-#      versioned_file: "envs/t2-tas212/terraform-vars.zip"
-#  - name: final-tile
-#    type: gcs-resource
-#    source:
-#      bucket: tas2to
-#      json_key: ((service-account-json))
-#      regexp: built-tiles/wavefront-nozzle-(.*).pivotal
   - name: wf-nozzle-version
     type: semver
     source:
@@ -156,9 +127,6 @@ jobs:
           ENV_FILE: pcf.yml
           CONFIG_FILE: ci/config/wavefront-nozzle.yml
           VARS_FILES: vars/metadata
-      - put: nozzle-tile
-        params:
-          file: baked-tile/*.pivotal
   - name: test-smith-installation
     plan:
       - get: wf-nozzle
