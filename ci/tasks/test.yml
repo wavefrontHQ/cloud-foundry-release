@@ -1,0 +1,117 @@
+---
+platform: linux
+
+inputs:
+  - name: tas-env
+
+params:
+  WAVEFRONT_API_TOKEN: ((wavefront-api-token))
+  WAVEFRONT_URL: vmware.wavefront.com
+
+run:
+  path: /bin/bash
+  args:
+    - -ceu
+    - |
+
+      PCF_FOUNDATION_NAME=$(cat tas-env/metadata | jq -r .name)
+      echo "setting start and stop time (about 2 minutes)..."
+      export METRIC_START_TIME_EPOCH=$(echo $((`date +%s`*1000+`date +%-N`/1000000)))
+
+      sleep 180
+
+      export METRIC_END_TIME_EPOCH=$(echo $((`date +%s`*1000+`date +%-N`/1000000)))
+
+      echo "Begin running 'validate wavefront metric for pcf integration and self monitoring' test..."
+      export url="https://${WAVEFRONT_URL}/api/v2/chart/api?q=sum(rate(ts(%22wavefront-firehose-nozzle.app.total-metrics-sent.count%22%2C%20foundation%3D${PCF_FOUNDATION_NAME})))&queryType=HYBRID&s=${METRIC_START_TIME_EPOCH}&e=${METRIC_END_TIME_EPOCH}&g=d&p=1&view=METRIC&sorted=false&cached=true&useRawQK=false"
+
+      curl_value=$(curl -X GET -w '\\n%{response_code}' --header 'Accept: application/json' --header "Authorization: Bearer ${WAVEFRONT_API_TOKEN}" "${url}")
+      response_code=$(echo $curl_value | sed 's/.*\\\\n//')
+      response=$(echo $curl_value | sed 's/\\\\n.*//')
+
+      echo $curl_value
+
+      echo $response_code
+
+      if [[ $response_code != 200 ]]; then
+        echo "failed to get the metric from url: $url"
+        exit 1
+      fi
+
+      echo $response > pcf-nozzle-metric.json
+
+      echo "Asserting for the query..."
+      query=$(cat pcf-nozzle-metric.json | jq --raw-output .query)
+      expected_query="sum(rate(ts(\"wavefront-firehose-nozzle.app.total-metrics-sent.count\", foundation=${PCF_FOUNDATION_NAME})))"
+      if [[ $query != $expected_query ]]; then
+        echo "Assertion query failed!"
+        exit 1
+      fi
+      echo "Assertion query passed!"
+
+      echo "Asserting for queryType..."
+      queryType=$(cat pcf-nozzle-metric.json | jq --raw-output .queryInfo.queryType)
+      expected_query_type="WQL"
+      if [[ $queryType != $expected_query_type ]]; then
+        echo "Assertion queryType failed!"
+        exit 1
+      fi
+      echo "Assertion queryType passed!"
+
+      echo "Checking for collected metric: wavefront-firehose-nozzle.app.total-metrics-sent.count and validating data..."
+      data=$(cat pcf-nozzle-metric.json | jq --raw-output .timeseries[0].data[0][1])
+      if (( $data > 0 )); then
+        echo "Metric was not collected!"
+        exit 1
+      fi
+      echo "Metric is collected: wavefront-firehose-nozzle.app.total-metrics-sent.count"
+      echo "Test 'validate wavefront metric for pcf integration and self monitoring' passed!"
+
+      echo "Begin running 'validate wavefront metric for pcf integration for pcf' test..."
+      url="https://${WAVEFRONT_URL}/api/v2/chart/api?q=rate(ts(%22pcf.cc.requests.completed.counter%22%2C%20foundation%3D${PCF_FOUNDATION_NAME}))&queryType=HYBRID&s=${METRIC_START_TIME_EPOCH}&e=${METRIC_END_TIME_EPOCH}&g=d&p=1&view=METRIC&sorted=false&cached=true&useRawQK=false"
+
+      curl_value=$(curl -X GET -w '\\n%{response_code}' --header 'Accept: application/json' --header "Authorization: Bearer ${WAVEFRONT_API_TOKEN}" "${url}")
+
+      echo $curl_value
+
+      response_code=$(echo $curl_value | sed 's/.*\\\\n//')
+      response=$(echo $curl_value | sed 's/\\\\n.*//')
+
+      if [[ $response_code != 200 ]]; then
+        echo "failed to get the metric from url: $url"
+        exit 1
+      fi
+
+      echo $response > pcf-server-metric.json
+
+      echo "Asserting for the query..."
+      query=$(cat pcf-server-metric.json | jq --raw-output .query)
+      expected_query="rate(ts(\"pcf.cc.requests.completed.counter\", foundation=${PCF_FOUNDATION_NAME}))"
+      if [[ $query != $expected_query ]]; then
+        echo "Assertion query failed!"
+        echo "Expected $query to equal $expected_query"
+        exit 1
+      fi
+      echo "Assertion query passed!"
+
+      echo "Asserting for query type..."
+      query_type=$(cat pcf-server-metric.json | jq --raw-output .queryInfo.queryType)
+      expected_query_type="WQL"
+      if [[ $query_type != $expected_query_type ]]; then
+        echo "Assertion query type failed!"
+        echo "Expected $query_type to equal $expected_query_type"
+        exit 1
+      fi
+      echo "Assertion query type passed!"
+
+      echo "Checking for collected metric: pcf.cc.requests.completed.counter and validating data..."
+      data=$(cat pcf-server-metric.json | jq --raw-output .timeseries[0].data[0][1])
+      if (( $data > 0 )); then
+        echo "Metric was not collected!"
+        exit 1
+      fi
+      echo "Metric is collected: pcf.cc.requests.completed.counter"
+      echo "Test 'validate wavefront metric for pcf integration for pcf' passed!"
+
+      echo ""
+      echo "ALL TESTS PASSED!"

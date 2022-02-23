@@ -1,0 +1,194 @@
+---
+resource_types:
+  - name: pcf-pool
+    type: docker-image
+    source:
+      repository: cftoolsmiths/toolsmiths-envs-resource
+  - name: gcs-resource
+    type: docker-image
+    source:
+      repository: observabilityresearch/gcs-resource
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
+resources:
+  - name: concourse-tasks
+    type: git
+    source:
+      uri: https://github.com/pivotal-cf/concourse-tasks
+      branch: master
+  - name: tas2to-image
+    type: docker-image
+    source:
+      repository: gcr.io/cf-denver/tas2to-ci
+      username: _json_key
+      password: ((service-account-json))
+  - name: wf-nozzle
+    type: git
+    source:
+      uri: git@github.com:wavefrontHQ/cloud-foundry-release
+      branch: main
+      private_key: ((git-key.private_key))
+  - name: platform-automation
+    type: pivnet
+    source:
+      product_slug: platform-automation
+      api_token: ((pivnet-refresh-token))
+   - name: nozzle-tile
+     type: gcs-resource
+     source:
+       bucket: wf-nozzle
+       json_key: ((service-account-json))
+       regexp: dev-tiles/tas2to-(.*).pivotal
+#  - name: denver-locks
+#    type: git
+#    source:
+#      uri: git@github.com:pivotal-cf/denver-locks
+#      branch: master
+#      private_key: ((git-key.private_key))
+#  - name: concourse-tasks
+#    type: git
+#    source:
+#      uri: https://github.com/pivotal-cf/concourse-tasks
+#      branch: master
+#  - name: terraform-vars
+#    type: gcs-resource
+#    source:
+#      bucket: tas2to
+#      json_key: ((service-account-json))
+#      versioned_file: "envs/t2-tas212/terraform-vars.zip"
+#  - name: final-tile
+#    type: gcs-resource
+#    source:
+#      bucket: tas2to
+#      json_key: ((service-account-json))
+#      regexp: built-tiles/wavefront-nozzle-(.*).pivotal
+  - name: wf-nozzle-version
+    type: semver
+    source:
+      driver: gcs
+      bucket: tas2to
+      key: versions/wf-nozzle
+      json_key: ((service-account-json))
+      initial_version: 3.0.5
+  - name: tas-env
+    type: pcf-pool
+    source:
+      api_token: ((toolsmiths-api-key))
+      hostname: environments.toolsmiths.cf-app.com
+      pool_name: "us_2_12"
+prepare-platform-automation-tasks-with-secrets: &prepare-platform-automation-tasks-with-secrets
+  image: platform-automation-image
+  file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
+  input_mapping:
+    tasks: platform-automation-tasks
+    vars: terraform-vars
+  output_mapping:
+    tasks: platform-automation-tasks
+  params:
+    CONFIG_PATHS: config/ci/config/ config/ci/t2-tas212/env
+    VARS_PATHS: vars config/ci/t2-tas212/vars/vars.yml
+prepare-tas2to-tasks-with-secrets: &prepare-tas2to-tasks-with-secrets
+  image: platform-automation-image
+  file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
+  input_mapping:
+    tasks: wf-nozzle
+    vars: terraform-vars
+  output_mapping:
+    tasks: tas2to-tasks-with-secrets
+  params:
+    CONFIG_PATHS: config/ci/config/ config/ci/t2-tas212/env
+    VARS_PATHS: vars config/ci/t2-tas212/vars/vars.yml
+    TASK_PATH: tasks/ci/tasks
+jobs:
+  - name: bake-and-install-wf-nozzle
+    serial_groups: [all]
+    plan:
+      - get: wf-nozzle
+      - put: wf-nozzle-version
+        params: {pre: build}
+      - get: tas2to-image
+      - get: tas-env
+        trigger: true
+        passed: [claim-tas-env]
+        version: every
+      - get: config
+        resource: wf-nozzle
+      - get: concourse-tasks
+      - in_parallel:
+          - get: platform-automation-image
+            resource: platform-automation
+            params:
+              globs: [ "*image*.tgz" ]
+              unpack: true
+          - get: platform-automation-tasks
+            resource: platform-automation
+            params:
+              globs: [ "*tasks*.zip" ]
+              unpack: true
+      - task: bake-tile
+        file: wf-nozzle/ci/tasks/bake.yml
+        image: tas2to-image
+        input_mapping:
+          tile-src: wf-nozzle
+      - task: "update-smith-config-files"
+        file: config/ci/tasks/update-smith-config-files.yml
+        image: tas2to-image
+      - task: "upload-product"
+        file: platform-automation-tasks/tasks/upload-product.yml
+        image: platform-automation-image
+        input_mapping:
+          product: baked-tile
+          env: tas-env
+        params:
+          ENV_FILE: pcf.yml
+      - task: "stage-configure-apply"
+        file: platform-automation-tasks/tasks/stage-configure-apply.yml
+        image: platform-automation-image
+        input_mapping:
+          env: tas-env
+          product: baked-tile
+          vars: tas-env
+          config: updated-config
+        params:
+          ENV_FILE: pcf.yml
+          CONFIG_FILE: ci/config/wavefront-nozzle.yml
+          VARS_FILES: vars/metadata
+      - put: nozzle-tile
+        params:
+          file: baked-tile/*.pivotal
+  - name: test-smith-installation
+    plan:
+      - get: wf-nozzle
+      - get: tas2to-image
+      - get: tas-env
+        trigger: true
+        passed: [bake-and-install-wf-nozzle]
+        version: every
+      - task: test-installation
+        file: wf-nozzle/ci/tasks/test.yml
+        image: tas2to-image
+
+  - name: claim-tas-env
+    serial_groups: [all]
+    plan:
+      - get: wf-nozzle
+        trigger: true
+      - put: tas-env
+        params:
+          action: claim
+        inputs: []
+  - name: "unclaim-tas-env"
+    plan:
+      - get: tas-env
+        trigger: true
+        passed: [test-smith-installation]
+        version: every
+      - put: tas-env
+        params:
+          action: unclaim
+          env_file: tas-env/metadata
+        inputs:
+          - tas-env

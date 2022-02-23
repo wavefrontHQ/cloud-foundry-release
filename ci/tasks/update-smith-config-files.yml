@@ -1,0 +1,32 @@
+---
+platform: linux
+
+inputs:
+- name: config
+- name: tas-env
+
+outputs:
+- name: updated-config
+- name: tas-env
+
+params:
+    WAVEFRONT_API_TOKEN: ((wavefront-api-token))
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -eu
+
+    ENV_NAME=$(cat tas-env/metadata | jq --raw-output .name)
+
+    sed -i -e 's/((availability_zones.0/((azs.0/g' config/ci/config/wavefront-nozzle.yml
+    sed -i -e 's/((availability_zones.1/((azs.1/g' config/ci/config/wavefront-nozzle.yml
+    sed -i -e 's/((availability_zones.2/((azs.2/g' config/ci/config/wavefront-nozzle.yml
+    sed -i -e "s/name: pas/name: ${ENV_NAME}-pas-subnet/g" config/ci/config/wavefront-nozzle.yml
+    sed -i -e 's/((wavefront-api-//g' config/ci/config/wavefront-nozzle.yml
+    sed -i -e 's/token))/replace-me/g' config/ci/config/wavefront-nozzle.yml
+    sed -i -e "s/replace-me/${WAVEFRONT_API_TOKEN}/g" config/ci/config/wavefront-nozzle.yml
+
+    cp -r config/. updated-config

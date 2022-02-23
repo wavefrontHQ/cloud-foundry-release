@@ -62,18 +62,9 @@ currentver=$(tile -v | cut -d" " -f3)
 requiredver=$(get_tile_latest_release)
  if [ "$(printf '%s\n' "${requiredver}" "${currentver}" | sort -V | head -n1)" != "${requiredver}" ]; then 
         echo "'tile' binary version '${currentver}' is older than '${requiredver}', please update it. https://github.com/cf-platform-eng/tile-generator/releases/latest"
-        exit
+        exit 1
  fi
 
-# Checking tile version format
-re='^[0-9]+.[0-9]+.[0-9]+$'
-if [[ ${VERSION} =~ $re ]]; then
-    TS=$(date +%s)
-    [ "${FINAL}" == "NO" ] && VERSION=${VERSION}-dev.${TS}
-else
-    echo "Incorrect version format, use X.X.X"
-    exit -1
-fi
 echo "Using version: '${VERSION}'"
 
 [ -d "tmp" ] && rm -rf tmp/* || mkdir -p tmp
@@ -135,7 +126,7 @@ echo
 (
     cd tmp
     if [[ -d ${NOZZLE_SOURCE} ]]; then
-        [ "${FINAL}" == "YES" ] && echo "For final tile use Nozzle Git release" && exit -1
+        [ "${FINAL}" == "YES" ] && echo "For final tile use Nozzle Git release" && exit 1
         echo "Copying files '${NOZZLE_SOURCE}' => $(pwd)/../resources/cloud-foundry-nozzle-go"
         cp -r ${NOZZLE_SOURCE} ../resources/cloud-foundry-nozzle-go
         (

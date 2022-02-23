@@ -1,0 +1,76 @@
+product-name: wavefront-nozzle
+product-properties:
+  .properties.advanced_config:
+    selected_option: normal
+    value: "no"
+  .properties.allow_paid_service_plans:
+    value: false
+  .properties.apply_open_security_group:
+    value: false
+  .properties.cf_quota_name:
+    value: default
+  .properties.custom_config_selector:
+    selected_option: default
+    value: Default
+  .properties.custom_tag_foundation:
+    value: ((name))
+  .properties.friendly_hostname:
+    value: ((name))
+  .properties.org:
+    value: wavefront-nozzle-org
+  .properties.pcf_skip_ssl_validation:
+    value: false
+  .properties.space:
+    value: wavefront-apps-space
+  .properties.wavefront_service_broker_enable_global_access_to_plans:
+    value: true
+  .properties.wavefront_token:
+    value: ((wavefront-api-token))
+  .properties.wavefront_url:
+    value: https://vmware.wavefront.com/api
+network-properties:
+  network:
+    name: pas
+  other_availability_zones:
+    - name: ((availability_zones.0))
+    - name: ((availability_zones.1))
+    - name: ((availability_zones.2))
+  singleton_availability_zone:
+    name: ((availability_zones.1))
+resource-config:
+  delete-all:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    elb_names: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    internet_connected: true
+    swap_as_percent_of_memory_size: automatic
+  deploy-all:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    elb_names: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    internet_connected: true
+    swap_as_percent_of_memory_size: automatic
+  wavefront_proxy:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    elb_names: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    internet_connected: true
+    swap_as_percent_of_memory_size: automatic
+errand-config:
+  delete-all:
+    pre-delete-state: true
+  deploy-all:
+    post-deploy-state: true
+
