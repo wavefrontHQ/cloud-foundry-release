@@ -9,7 +9,7 @@ EOM
 
 set -e
 
-PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-9.2.tar.gz'
+PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-10.14.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
 NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.3.1.tar.gz'
@@ -114,7 +114,7 @@ echo
     tar -zxf "${PROXY_TGZ}"
 
     cd wavefront-proxy-wavefront*
-    mvn ${MVN_OPTS} clean install -DskipTests -Dlog4j.version=2.16.0
+    mvn ${MVN_OPTS} clean install -DskipTests
     cp proxy/target/proxy-*-uber.jar ../../proxy-bosh-release/src/wavefront-proxy.jar
 )
 
