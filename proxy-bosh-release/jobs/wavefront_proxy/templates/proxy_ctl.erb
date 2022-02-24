@@ -27,7 +27,7 @@ cd $OPENJDK_HOME
 archive="OpenJDK11U-jdk_x64_linux_hotspot_11.0.14.1_1.tar.gz"
 tar -zxvf $archive
 
-export JRE_HOME=$(find ${OPENJDK_HOME} -type d -name "jdk-11")
+export JRE_HOME=${OPENJDK_HOME}/jdk-11.0.14.1+1
 export JAVA_BINARY=${JRE_HOME}/bin/java
 
 version=$(${JRE_HOME}/bin/java -Xmx64M -version 2>&1)

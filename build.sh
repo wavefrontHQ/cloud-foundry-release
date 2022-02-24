@@ -50,6 +50,9 @@ done
 [ "${DEBUG}" == "YES" ] && export BOSH_LOG_LEVEL=debug
 [ "${DEBUG}" == "YES" ] && MVN_OPTS='-B' || MVN_OPTS='-q'
 
+TS=$(date +%s)
+[ "${FINAL}" == "NO" ] && VERSION=${VERSION}-dev.${TS}
+
 # Checking 'tile' binary version
 
 get_tile_latest_release() {
@@ -85,9 +88,6 @@ echo
     cd proxy-bosh-release/blobs
     for url in ${BLOBS_FILES}; do
         file=$(echo "${url##*/}")
-        if [[ "${file}" == openjdk* ]]; then
-            file="OpenJDK11U-jdk_x64_linux_hotspot_11.0.14.1_1.tar.gz"
-        fi
         [ "${DOWNLOAD}" == "YES" ] && rm ${file}
         if [ ! -f "${file}" ]; then
             echo "Downloading File '${file}' => ${url}"

@@ -77,18 +77,18 @@ jobs:
   - name: bake-and-install-wf-nozzle
     serial_groups: [all]
     plan:
-      - get: wf-nozzle
-      - put: wf-nozzle-version
-        params: {pre: build}
-      - get: tas2to-image
-      - get: tas-env
-        trigger: true
-        passed: [claim-tas-env]
-        version: every
-      - get: config
-        resource: wf-nozzle
-      - get: concourse-tasks
       - in_parallel:
+          - get: wf-nozzle
+          - put: wf-nozzle-version
+            params: {pre: build}
+          - get: tas2to-image
+          - get: tas-env
+            trigger: true
+            passed: [claim-tas-env]
+            version: every
+          - get: config
+            resource: wf-nozzle
+          - get: concourse-tasks
           - get: platform-automation-image
             resource: platform-automation
             params:
@@ -99,34 +99,42 @@ jobs:
             params:
               globs: [ "*tasks*.zip" ]
               unpack: true
-      - task: bake-tile
-        file: wf-nozzle/ci/tasks/bake.yml
-        image: tas2to-image
-        input_mapping:
-          tile-src: wf-nozzle
-      - task: "update-smith-config-files"
-        file: config/ci/tasks/update-smith-config-files.yml
-        image: tas2to-image
-      - task: "upload-product"
-        file: platform-automation-tasks/tasks/upload-product.yml
-        image: platform-automation-image
-        input_mapping:
-          product: baked-tile
-          env: tas-env
-        params:
-          ENV_FILE: pcf.yml
-      - task: "stage-configure-apply"
-        file: platform-automation-tasks/tasks/stage-configure-apply.yml
-        image: platform-automation-image
-        input_mapping:
-          env: tas-env
-          product: baked-tile
-          vars: tas-env
-          config: updated-config
-        params:
-          ENV_FILE: pcf.yml
-          CONFIG_FILE: ci/config/wavefront-nozzle.yml
-          VARS_FILES: vars/metadata
+      - do:
+          - task: bake-tile
+            file: wf-nozzle/ci/tasks/bake.yml
+            image: tas2to-image
+            input_mapping:
+              tile-src: wf-nozzle
+          - task: "update-smith-config-files"
+            file: config/ci/tasks/update-smith-config-files.yml
+            image: tas2to-image
+          - task: "upload-product"
+            file: platform-automation-tasks/tasks/upload-product.yml
+            image: platform-automation-image
+            input_mapping:
+              product: baked-tile
+              env: tas-env
+            params:
+              ENV_FILE: pcf.yml
+          - task: "stage-configure-apply"
+            file: platform-automation-tasks/tasks/stage-configure-apply.yml
+            image: platform-automation-image
+            input_mapping:
+              env: tas-env
+              product: baked-tile
+              vars: tas-env
+              config: updated-config
+            params:
+              ENV_FILE: pcf.yml
+              CONFIG_FILE: ci/config/wavefront-nozzle.yml
+              VARS_FILES: vars/metadata
+        on_failure:
+          put: tas-env
+          params:
+            action: unclaim
+            env_file: tas-env/metadata
+          inputs:
+              - tas-env
   - name: test-smith-installation
     plan:
       - get: wf-nozzle
