@@ -10,4 +10,4 @@ else
   exit 1
 fi
 cp -r $archive ${BOSH_INSTALL_TARGET}
-cp -r jsvc ${BOSH_INSTALL_TARGET}
+cp -r jsvc-1.2.3 ${BOSH_INSTALL_TARGET}/jsvc

@@ -5,5 +5,5 @@ dependencies: []
 
 files:
 - commons-daemon-1.2.3-bin.tar.gz
-- jsvc
+- jsvc-1.2.3
 

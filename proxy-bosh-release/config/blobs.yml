@@ -4,6 +4,6 @@ commons-daemon-1.2.3-bin.tar.gz:
 openjdk-11+28_linux-x64_bin.tar.gz:
   size: 187611826
   sha: 3784cfc4670f0d4c5482604c7c513beb1a92b005f569df9bf100e8bef6610f2e
-jsvc:
+jsvc-1.2.3:
   size: 48416
   sha: 5d0fe2c48893477e53140dda142f834813a682ba

@@ -93,8 +93,9 @@ echo
             echo "Downloading File '${file}' => ${url}"
             curl -L "${url}" --output ${file}
             if [[ "${file}" == jsvc* ]]; then
-                [ -f "jsvc" ] && rm jsvc
+                [ -f "jsvc-1.2.3" ] && rm jsvc-1.2.3
                 unzip ${file}
+                mv jsvc jsvc-1.2.3
             fi
         fi
     done
