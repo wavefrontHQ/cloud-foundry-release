@@ -9,7 +9,7 @@ EOM
 
 set -e
 
-PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-10.14.tar.gz'
+PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/proxy-11.0.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
 NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.3.1.tar.gz'
@@ -113,7 +113,7 @@ echo
 
     tar -zxf "${PROXY_TGZ}"
 
-    cd wavefront-proxy-wavefront*
+    cd wavefront-proxy-proxy*/proxy
     mvn ${MVN_OPTS} clean install -DskipTests
     cp proxy/target/proxy-*-uber.jar ../../proxy-bosh-release/src/wavefront-proxy.jar
 )
