@@ -1,6 +1,8 @@
 #!/bin/bash
 # A Simple Shell Script to Build Nozzle for PCF
 
+project_dir=$(cd $(dirname $0) && pwd)
+
 read -r -d '' BLOBS_FILES <<- EOM
 https://s3-us-west-2.amazonaws.com/wavefront-cdn/pcf/bosh-artifacts/commons-daemon-1.2.3-bin.tar.gz
 https://wavefront-cdn.s3-us-west-2.amazonaws.com/pcf/bosh-artifacts/openjdk-11_28_linux-x64_bin.tar.gz
@@ -9,11 +11,10 @@ EOM
 
 set -e
 
-PROXY_SOURCE='https://github.com/wavefrontHQ/java/archive/wavefront-9.2.tar.gz'
+PROXY_SOURCE='https://github.com/wavefrontHQ/wavefront-proxy/archive/refs/tags/proxy-11.1.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
-NOZZLE_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-nozzle-go/archive/v1.3.1.tar.gz'
-# NOZZLE_SOURCE="${HOME}/go/src/github.com/wavefronthq/cloud-foundry-nozzle-go/"
+NOZZLE_SOURCE="${project_dir}/cloud-foundry-nozzle-go/"
 NOZZLE_TGZ='nozzle.tgz'
 
 BROKER_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-servicebroker/archive/0.9.5.tar.gz'
@@ -113,9 +114,10 @@ echo
 
     tar -zxf "${PROXY_TGZ}"
 
-    cd wavefront-proxy-wavefront*
-    mvn ${MVN_OPTS} clean install -DskipTests -Dlog4j.version=2.16.0
-    cp proxy/target/proxy-*-uber.jar ../../proxy-bosh-release/src/wavefront-proxy.jar
+    cd wavefront-proxy-proxy*
+    cd proxy
+    mvn ${MVN_OPTS} clean install -DskipTests
+    cp target/proxy-*-uber.jar ../../../proxy-bosh-release/src/wavefront-proxy.jar
 )
 
 echo

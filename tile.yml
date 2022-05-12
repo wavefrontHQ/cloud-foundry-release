@@ -87,6 +87,7 @@ packages:
 
       NOZZLE_FIREHOSE_SUBSCRIPTION_ID: wf-firehose-subscription-id
       NOZZLE_SKIP_SSL: (( .properties.pcf_skip_ssl_validation.value ))
+      NOZZLE_ENABLE_APP_CACHE: (( .properties.enable_app_cache.value ))
 
       NOZZLE_CHANNEL_SIZE: (( .properties.advanced_config.advanced.queue_size.value ))
       NOZZLE_WORKERS: (( .properties.advanced_config.advanced.workers.value ))
@@ -183,6 +184,11 @@ forms:
     label: Skip SSL Verification
     default: false
     description: Useful for testing environments where SSL is not properly setup. Should not be used in prod environments.
+  - name: enable_app_cache
+    type: boolean
+    label: Query CAPI to add org, space and applicationName to container metrics
+    default: true
+    description: Useful for adding additonal app metadata to container metrics.  This functionality is not necessary from TAS 2.8+ as the platform already handles this.
   - name: advanced_config
     type: selector
     label: Advanced Nozzle Options
