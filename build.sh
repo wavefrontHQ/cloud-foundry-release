@@ -14,7 +14,7 @@ set -e
 PROXY_SOURCE='https://github.com/wavefrontHQ/wavefront-proxy/archive/refs/tags/proxy-11.1.tar.gz'
 PROXY_TGZ='proxy.tgz'
 
-NOZZLE_SOURCE="${project_dir}/cloud-foundry-nozzle-go/"
+NOZZLE_SOURCE="${project_dir}/../cloud-foundry-nozzle-go/"
 NOZZLE_TGZ='nozzle.tgz'
 
 BROKER_SOURCE='https://github.com/wavefrontHQ/cloud-foundry-servicebroker/archive/0.9.5.tar.gz'
