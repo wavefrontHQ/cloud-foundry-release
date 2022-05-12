@@ -31,6 +31,12 @@ resources:
       uri: git@github.com:wavefrontHQ/cloud-foundry-release
       branch: main
       private_key: ((git-key.private_key))
+  - name: cloud-foundry-nozzle-go
+    type: git
+    source:
+      uri: git@github.com:wavefrontHQ/cloud-foundry-nozzle-go
+      branch: master
+      private_key: ((git-key.private_key))
   - name: platform-automation
     type: pivnet
     source:
@@ -107,6 +113,7 @@ jobs:
     serial_groups: [all]
     plan:
       - get: wf-nozzle
+      - get: cloud-foundry-nozzle-go
       - put: wf-nozzle-version
         params: {pre: build}
       - get: tas2to-image
@@ -133,6 +140,7 @@ jobs:
         image: tas2to-image
         input_mapping:
           tile-src: wf-nozzle
+          cloud-foundry-nozzle-go: cloud-foundry-nozzle-go
       - task: "update-smith-config-files"
         file: config/ci/tasks/update-smith-config-files.yml
         image: tas2to-image

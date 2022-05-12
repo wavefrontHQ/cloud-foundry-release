@@ -4,6 +4,7 @@ platform: linux
 inputs:
 - name: tile-src
 - name: wf-nozzle-version
+- name: cloud-foundry-nozzle-go
 
 outputs:
 - name: baked-tile
