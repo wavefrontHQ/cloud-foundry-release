@@ -22,7 +22,7 @@ scripts_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 project_dir=$(cd "${scripts_dir}"/.. && pwd)
 
 fly --target tas2to set-pipeline \
-    --pipeline wf-nozzle-main \
+    --pipeline legacy-wf-nozzle-main \
     --config <(ytt -f "${project_dir}/ci/pipeline.yml") \
     --var initial-version="0.5.0" \
     --var docker-host="10.0.1.5"
